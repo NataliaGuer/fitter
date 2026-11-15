@@ -2,8 +2,9 @@
 
 from collections.abc import Iterator
 from functools import lru_cache
-from typing import Any
+from typing import Annotated, Any
 
+from fastapi import Depends
 from sqlalchemy import Engine, MetaData, create_engine, event
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
@@ -53,3 +54,6 @@ def get_db() -> Iterator[Session]:
     """FastAPI dependency: one DB session per request, closed at the end."""
     with _get_sessionmaker()() as session:
         yield session
+
+
+DbSession = Annotated[Session, Depends(get_db)]

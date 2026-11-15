@@ -10,6 +10,7 @@ from app.core.config import Settings
 REGISTER = "/api/auth/register"
 LOGIN = "/api/auth/login"
 LOGOUT = "/api/auth/logout"
+ME = "/api/auth/me"
 COOKIE = "fitter_session"
 
 
@@ -161,3 +162,73 @@ def test_cookie_secure_flag(client: TestClient, monkeypatch: pytest.MonkeyPatch)
     )
     secure = client.post(REGISTER, json=_credentials("luca"))
     assert "secure" in secure.headers.get("set-cookie", "").lower()
+
+
+# --- me / current_user --------------------------------------------------------
+
+
+def _register_and_get_token(client: TestClient, nickname: str) -> str:
+    response = client.post(REGISTER, json=_credentials(nickname))
+    assert response.status_code == 201
+    return response.cookies[COOKIE]
+
+
+def test_me_without_cookie_401(client: TestClient) -> None:
+    response = client.get(ME)
+
+    assert response.status_code == 401
+    assert "set-cookie" not in response.headers
+
+
+def test_me_with_invented_cookie_401(client: TestClient) -> None:
+    client.cookies.set(COOKIE, "token-inventato")
+
+    assert client.get(ME).status_code == 401
+
+
+def test_me_after_register_returns_user_and_renews_cookie(client: TestClient) -> None:
+    token = _register_and_get_token(client, "Mario")
+
+    response = client.get(ME)
+
+    assert response.status_code == 200
+    assert response.json() == {"id": response.json()["id"], "nickname": "Mario"}
+    cookie = response.headers.get("set-cookie", "").lower()
+    assert cookie.startswith(f"{COOKIE}={token.lower()};")
+    assert "max-age=34560000" in cookie
+    assert "httponly" in cookie
+
+
+def test_me_after_login(client: TestClient) -> None:
+    _register_and_get_token(client, "mario")
+    client.cookies.clear()
+    client.post(LOGIN, json=_credentials("mario"))
+
+    assert client.get(ME).json()["nickname"] == "mario"
+
+
+def test_old_cookie_rejected_after_logout(client: TestClient) -> None:
+    token = _register_and_get_token(client, "mario")
+    assert client.post(LOGOUT).status_code == 204
+
+    client.cookies.set(COOKIE, token)  # the browser could still send the old cookie
+
+    assert client.get(ME).status_code == 401
+
+
+def test_me_returns_only_own_user(client: TestClient) -> None:
+    anna_token = _register_and_get_token(client, "anna")
+    client.cookies.clear()
+    luca_token = _register_and_get_token(client, "luca")
+
+    client.cookies.clear()
+    client.cookies.set(COOKIE, anna_token)
+    anna = client.get(ME).json()
+
+    client.cookies.clear()
+    client.cookies.set(COOKIE, luca_token)
+    luca = client.get(ME).json()
+
+    assert anna["nickname"] == "anna"
+    assert luca["nickname"] == "luca"
+    assert anna["id"] != luca["id"]

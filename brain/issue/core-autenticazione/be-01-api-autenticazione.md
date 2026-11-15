@@ -2,7 +2,7 @@
 
 - **Feature**: CORE-002 (`features/core-autenticazione.md`), include CORE-001 (setup DB)
 - **Lato**: backend
-- **Stato**: in corso (approvata 2026-11-15)
+- **Stato**: fatta (2026-11-15; approvata 2026-11-15)
 - **Dipende da**: —
 
 ## Obiettivo
@@ -14,14 +14,14 @@ per essere usato dall'issue frontend `CORE-002-FE-01`; nessuna modifica a `front
 ## Requisiti coperti
 
 Dalla sezione *Requisiti → Backend* della feature:
-- [ ] Registrazione libera: nickname univoco (case-insensitive) di 3–30 caratteri tra lettere, cifre, `_`, `-`, `.`; PIN di esattamente 4 cifre.
-- [ ] La registrazione effettua anche il login (crea la sessione).
-- [ ] PIN salvato solo come hash (argon2).
-- [ ] Login → sessione nel DB + cookie `HttpOnly`, `SameSite=Lax`, `Secure` in prod.
-- [ ] Sessione senza scadenza lato server; cookie da 400 giorni rinnovato a ogni `GET /api/auth/me`.
-- [ ] Logout → elimina la sessione dal DB e cancella il cookie.
-- [ ] Dipendenza FastAPI `current_user` (401 senza sessione valida).
-- [ ] Errore generico al login e tempi di risposta simili per nickname esistente o no.
+- [x] Registrazione libera: nickname univoco (case-insensitive) di 3–30 caratteri tra lettere, cifre, `_`, `-`, `.`; PIN di esattamente 4 cifre.
+- [x] La registrazione effettua anche il login (crea la sessione).
+- [x] PIN salvato solo come hash (argon2).
+- [x] Login → sessione nel DB + cookie `HttpOnly`, `SameSite=Lax`, `Secure` in prod.
+- [x] Sessione senza scadenza lato server; cookie da 400 giorni rinnovato a ogni `GET /api/auth/me`.
+- [x] Logout → elimina la sessione dal DB e cancella il cookie.
+- [x] Dipendenza FastAPI `current_user` (401 senza sessione valida).
+- [x] Errore generico al login e tempi di risposta simili per nickname esistente o no.
 
 Criteri di accettazione della feature coperti: nickname duplicati rifiutati (anche con maiuscole diverse), PIN non
 valido rifiutato, `401` senza sessione, cookie non più valido dopo il logout, nessun PIN/token in chiaro nel DB.
@@ -219,7 +219,7 @@ Comando dei test usato sotto (ambiente dev avviato con `./script/start-dev.sh`):
 
 ### Passo 5 — `GET /api/auth/me` e dipendenza `current_user`
 
-- **Stato**: da fare
+- **Stato**: fatto (2026-11-15)
 - **Obiettivo**: c'è un modo unico per proteggere gli endpoint (`current_user`) e il frontend può verificare la
   sessione rinnovando il cookie.
 - **Lavoro**:
@@ -227,17 +227,19 @@ Comando dei test usato sotto (ambiente dev avviato con `./script/start-dev.sh`):
   - `auth/router.py`: `GET /me` che usa `current_user` e reimposta il cookie con `Max-Age` di 400 giorni.
   - `tests/test_auth_api.py` (seconda parte).
 - **Definition of done**:
-  - [ ] Test verdi, inclusi: `/me` senza cookie `401`; con cookie inventato `401`; dopo register `200` con
+  - [x] Test verdi, inclusi: `/me` senza cookie `401`; con cookie inventato `401`; dopo register `200` con
         `{id, nickname}` e `set-cookie` con `Max-Age=34560000`; dopo logout il vecchio cookie riceve `401`;
         `test_me_returns_only_own_user` (due utenti con due cookie: ognuno vede solo sé stesso).
-  - [ ] A mano, nell'ambiente dev, sequenza `curl` con file dei cookie (`-c`/`-b cookies.txt`):
+  - [x] A mano, nell'ambiente dev, sequenza `curl` con file dei cookie (`-c`/`-b cookies.txt`):
         register → `me` `200` → logout `204` → `me` `401`.
-  - [ ] `docker compose -f docker-compose.dev.yaml exec app python -m sqlite3 /data/fitter.db "select token_hash from sessions"`
+  - [x] `docker compose -f docker-compose.dev.yaml exec app python -m sqlite3 /data/fitter.db "select token_hash from sessions"`
         non contiene il valore del cookie salvato in `cookies.txt`.
   - [ ] CI verde.
+        _Non verificata: passo chiuso su conferma dell'utente._
   - [ ] Se il rilascio è attivo (`RELEASE_ENABLED=true`): sul Pi, dopo il deploy, `docker compose logs app` mostra
         la migrazione `0001` applicata e `curl -i http://127.0.0.1:8000/api/auth/me` risponde `401`.
         Se il rilascio non è attivo, la voce si segna come non applicabile.
+        _Non verificata: passo chiuso su conferma dell'utente._
 
 ## Note di implementazione
 
@@ -302,3 +304,16 @@ Comando dei test usato sotto (ambiente dev avviato con `./script/start-dev.sh`):
 - Esito verifiche locali: 55 test verdi con `pytest -W error`; `curl` di registrazione → `201` con
   `set-cookie: fitter_session=...; HttpOnly; Max-Age=34560000; Path=/; SameSite=lax`; `/docs` mostra i tre endpoint.
 - Nel DB di sviluppo resta l'utente `prova` creato dalla verifica con `curl`.
+
+### Passo 5 (2026-11-15)
+- File creati: `app/auth/deps.py` (`current_user`, alias `CurrentUser`, `COOKIE_NAME`, `SessionToken`).
+  Modificati: `app/auth/router.py` (`GET /me`; usa costanti e dipendenze di `deps.py`), `app/core/db.py` (alias
+  `DbSession` riusabile da tutti i router), `tests/test_auth_api.py`.
+- `/me` reimposta lo stesso token con `Max-Age` di 400 giorni: il token non cambia, si allunga solo la scadenza.
+- Uso per le feature future: `def endpoint(user: CurrentUser, db: DbSession)` e query filtrate per `user.id`
+  (esempio nella docstring di `deps.py`).
+- Esito verifiche locali: 61 test verdi con `pytest -W error`; sequenza `curl` register `201` → `me` `200` →
+  logout `204` → `me` con il vecchio cookie `401`; il `token_hash` nel DB non contiene il token del cookie.
+- Verifica sul Pi: non eseguita da qui (non ho accesso alle variabili del repository per sapere se
+  `RELEASE_ENABLED` è attivo né al Pi).
+- Nel DB di sviluppo restano gli utenti `prova` e `prova5` creati dalle verifiche con `curl`.

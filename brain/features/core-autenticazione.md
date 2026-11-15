@@ -28,14 +28,14 @@ Permettere a più persone di usare l'app, ognuna con i propri dati, con un acces
 ## Requisiti
 
 ### Backend (CORE-002-BE)
-- [ ] Registrazione libera: nickname univoco (case-insensitive) di 3–30 caratteri tra lettere, cifre, `_`, `-`, `.`; PIN di esattamente 4 cifre numeriche.
-- [ ] La registrazione effettua anche il login (crea la sessione).
-- [ ] PIN salvato solo come hash (argon2).
-- [ ] Login → crea una sessione nel DB e imposta un cookie `HttpOnly`, `SameSite=Lax`, `Secure` in prod.
-- [ ] Sessione senza scadenza lato server; cookie con durata massima consentita dai browser (400 giorni), **rinnovato a ogni apertura dell'app** (`GET /api/auth/me`), così in pratica non scade mai.
-- [ ] Logout → elimina la sessione dal DB e cancella il cookie.
-- [ ] Dipendenza FastAPI `current_user` per proteggere gli endpoint (401 senza sessione valida).
-- [ ] Messaggio di errore generico al login (non rivelare se il nickname esiste); tempo di risposta simile nei due casi.
+- [x] Registrazione libera: nickname univoco (case-insensitive) di 3–30 caratteri tra lettere, cifre, `_`, `-`, `.`; PIN di esattamente 4 cifre numeriche.
+- [x] La registrazione effettua anche il login (crea la sessione).
+- [x] PIN salvato solo come hash (argon2).
+- [x] Login → crea una sessione nel DB e imposta un cookie `HttpOnly`, `SameSite=Lax`, `Secure` in prod.
+- [x] Sessione senza scadenza lato server; cookie con durata massima consentita dai browser (400 giorni), **rinnovato a ogni apertura dell'app** (`GET /api/auth/me`), così in pratica non scade mai.
+- [x] Logout → elimina la sessione dal DB e cancella il cookie.
+- [x] Dipendenza FastAPI `current_user` per proteggere gli endpoint (401 senza sessione valida).
+- [x] Messaggio di errore generico al login (non rivelare se il nickname esiste); tempo di risposta simile nei due casi.
 
 ### Frontend (CORE-002-FE)
 - [ ] Setup HeroUI + Tailwind (prima feature con UI, vedi D-007) e pulizia del boilerplate Vite.
@@ -95,7 +95,7 @@ Errori nel formato standard FastAPI (`{"detail": ...}`).
 
 | ID | Lato | Stato | File |
 |----|------|-------|------|
-| CORE-002-BE-01 | backend | in corso (approvata 2026-11-15) | `issue/core-autenticazione/be-01-api-autenticazione.md` |
+| CORE-002-BE-01 | backend | fatta (2026-11-15) | `issue/core-autenticazione/be-01-api-autenticazione.md` |
 | CORE-002-FE-01 | frontend | bozza | `issue/core-autenticazione/fe-01-accesso-e-sessione.md` |
 
 Il piano tecnico qui sotto (flusso precedente a D-011) è la base delle issue; in caso di differenze vale l'issue.

@@ -1,23 +1,17 @@
 """/api/auth endpoints (CORE-002-BE-01). The frontend relies on status codes, not on `detail`."""
 
-from typing import Annotated
-
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, Response, status
 
 from app.auth import service
+from app.auth.deps import COOKIE_NAME, CurrentUser, SessionToken
 from app.auth.schemas import Credentials, UserOut
 from app.core.config import get_settings
-from app.core.db import get_db
+from app.core.db import DbSession
 
-COOKIE_NAME = "fitter_session"
 # 400 days: the maximum cookie lifetime allowed by browsers (D-009).
 COOKIE_MAX_AGE = 400 * 24 * 60 * 60
 
 router = APIRouter(tags=["auth"])
-
-DbSession = Annotated[Session, Depends(get_db)]
-SessionToken = Annotated[str | None, Cookie(alias=COOKIE_NAME)]
 
 
 def set_session_cookie(response: Response, token: str) -> None:
@@ -77,3 +71,15 @@ def logout(response: Response, db: DbSession, token: SessionToken = None) -> Non
     if token:
         service.delete_session(db, token)
     clear_session_cookie(response)
+
+
+@router.get(
+    "/me",
+    response_model=UserOut,
+    responses={status.HTTP_401_UNAUTHORIZED: {"description": "Not authenticated"}},
+)
+def me(user: CurrentUser, response: Response, token: SessionToken = None) -> UserOut:
+    """The logged-in user. Renews the cookie for another 400 days at every app start (D-009)."""
+    if token:  # always set here: current_user has already validated it
+        set_session_cookie(response, token)
+    return UserOut.model_validate(user)
