@@ -1,0 +1,12 @@
+[Unit]
+Description=Fitter - controlla e installa nuove versioni da GHCR
+Wants=network-online.target
+After=network-online.target docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+# Modificare utente e percorso se diversi (vedi deploy/README.md)
+User=pi
+WorkingDirectory=/opt/fitter
+ExecStart=/opt/fitter/deploy/deploy.sh

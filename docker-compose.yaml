@@ -1,7 +1,9 @@
+# Produzione (Raspberry Pi): usa l'immagine pubblicata dalla CI su GHCR.
+# APP_IMAGE va definita in .env, es: APP_IMAGE=ghcr.io/<owner>/<repo>
 services:
   app:
-    build: .
-    container_name: app-palestra
+    image: ${APP_IMAGE:?Definire APP_IMAGE in .env}:latest
+    container_name: fitter
     restart: unless-stopped
     env_file:
       - .env

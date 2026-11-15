@@ -1,2 +1,4 @@
 .env.dev
 .env
+data/
+backend/app/__pycache__

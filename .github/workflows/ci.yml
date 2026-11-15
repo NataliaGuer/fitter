@@ -1,0 +1,95 @@
+# CI + rilascio (CORE-003, D-008)
+# - Ogni push/PR: lint e build del frontend, verifica del backend, build dell'immagine ARM64.
+# - Push su main con la variabile di repository RELEASE_ENABLED=true: pubblica l'immagine su GHCR.
+#   Il Raspberry Pi la scarica da solo (vedi deploy/).
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  backend:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - run: pip install -r requirements.txt
+      # Verifica minima finché non ci sono linter/test backend (verranno aggiunti con CORE-001)
+      - run: python -m compileall -q app
+      - run: python -c "import app.main"
+      - name: Test
+        run: |
+          if [ -d tests ]; then pip install pytest && python -m pytest; else echo "Nessun test backend"; fi
+
+  image:
+    needs: [frontend, backend]
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      packages: write
+    env:
+      RELEASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.RELEASE_ENABLED == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login a GHCR
+        if: env.RELEASE == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Metadati immagine
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=long
+
+      - name: Build (e push se rilascio)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: prod
+          platforms: linux/arm64
+          push: ${{ env.RELEASE == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

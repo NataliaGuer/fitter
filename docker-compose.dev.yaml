@@ -1,0 +1,31 @@
+services:
+  app:
+    build:
+      context: .
+      target: dev
+    environment:
+      - ENV=development
+      - DEBUG=True
+    container_name: fitter
+    restart: unless-stopped
+    env_file:
+      - .env.dev
+    volumes:
+      - ./backend/app:/backend/app
+      - ./backend/requirements.txt:/backend/requirements.txt
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  frontend:
+    build:
+      context: .
+      target: frontend-dev
+    container_name: fitter-frontend
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/frontend
+      - /frontend/node_modules
+    ports:
+      - "127.0.0.1:5173:5173"
+    depends_on:
+      - app
