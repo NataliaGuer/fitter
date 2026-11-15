@@ -51,7 +51,7 @@ Formato: una sezione per decisione, la più recente in fondo.
   - Autenticazione con **cookie di sessione** (`HttpOnly`, `Secure` in prod, `SameSite=Lax`); sessioni salvate nel DB.
   - **Registrazione libera** con **nickname** (univoco) e **PIN di 4 cifre**.
 - **Conseguenze**:
-  - Un PIN di 4 cifre ha solo 10.000 combinazioni: servono contromisure obbligatorie contro i tentativi a forza bruta, cioè un limite ai tentativi falliti per nickname e per IP, con blocco temporaneo.
+  - ~~Un PIN di 4 cifre ha solo 10.000 combinazioni: servono contromisure obbligatorie contro i tentativi a forza bruta.~~ **Superato da D-009**: per ora nessun limite ai tentativi.
   - Il PIN si salva solo come hash (argon2 o bcrypt), mai in chiaro.
   - Logout = invalidazione della sessione lato server.
 - **Dettagli**: vedi `features/core-autenticazione.md` (CORE-002).
@@ -75,6 +75,48 @@ Formato: una sezione per decisione, la più recente in fondo.
   - Deploy **pull-based**: timer systemd sul Pi ogni 5 minuti → `deploy/deploy.sh` (git pull, pull dell'immagine, backup del DB, riavvio). Ultimi 10 backup conservati.
   - Esclusi: runner self-hosted (rischioso con repo pubblica), deploy via SSH (porte esposte), Watchtower.
 - **Conseguenze**: branch principale `main`; Raspberry Pi con Debian 13 `arm64` (confermato); nessun segreto del Pi su GitHub; `docker-compose.yaml` di produzione usa l'immagine (`APP_IMAGE` in `.env`) invece della build locale.
+
+## D-009 — Autenticazione backend: sessione permanente, niente anti forza bruta
+- **Data**: 2026-11-15
+- **Stato**: accettata (piano CORE-002-BE approvato)
+- **Contesto**: l'app è usata solo dall'utente e dalla sua famiglia ed è raggiungibile **solo tramite VPN**.
+- **Decisione**:
+  - **Nessun limite ai tentativi di login** (né per nickname né per IP): modifica D-006. Da reintrodurre se l'app si apre a utenti esterni o esce dalla VPN.
+  - **Sessione permanente**: token casuale opaco (`secrets.token_urlsafe(32)`) nel cookie `fitter_session`, nel DB solo il suo SHA-256; nessuna scadenza lato server; cookie da 400 giorni (massimo dei browser) rinnovato a ogni `GET /api/auth/me`. Logout = eliminazione della riga di sessione.
+  - Hash del PIN con **argon2-cffi**. Il PIN non si può cambiare.
+  - Nickname univoco case-insensitive con `COLLATE NOCASE` (ammessi solo caratteri ASCII `A-Z a-z 0-9 _ - .`).
+  - Config da variabili d'ambiente senza `pydantic-settings`; migrazioni Alembic applicate all'avvio del container.
+- **Conseguenze**: un PIN di 4 cifre è indovinabile in pochi minuti da chi raggiunge l'app: la sicurezza poggia sulla VPN.
+
+## D-010 — Frontend: HeroUI v3, niente router, proxy Vite
+- **Data**: 2026-11-15
+- **Stato**: accettata (piano CORE-002-FE approvato)
+- **Decisione**:
+  - **HeroUI v3** (`@heroui/react` + `@heroui/styles`) con **Tailwind CSS 4** (`@tailwindcss/vite`); tema chiaro/scuro che segue il sistema.
+  - Nessun router per ora: un `AuthProvider` (React context) decide tra accesso e home. Router da introdurre con la prima feature a più pagine.
+  - Chiamate API con un piccolo wrapper su `fetch` (niente TanStack Query per ora).
+  - In sviluppo Vite fa da proxy per `/api` verso il backend (stessa origine come in prod, niente CORS).
+  - Il service worker della PWA non intercetta `/api` (`navigateFallbackDenylist`).
+  - Offline all'avvio: messaggio con "Riprova", mai logout automatico.
+
+## D-011 — Flusso di lavoro: feature → issue → passi con definition of done
+- **Data**: 2026-11-15
+- **Stato**: accettata
+- **Decisione**:
+  - Le feature (`brain/features/`) non si implementano direttamente: vanno prima trasformate in **issue** (`brain/issue/<feature>/`, una cartella per feature) con la skill `/feature-to-issue`.
+  - Ogni issue riguarda **solo il backend** o **solo il frontend**; il contratto API è la frontiera tra le due.
+  - Il **piano tecnico** sta nell'issue (non più nella feature) e contiene passi incrementali, ognuno con una **definition of done** verificabile.
+  - Si implementa un passo alla volta; il passo si chiude solo quando l'**utente** conferma che la DoD è soddisfatta.
+- **Conseguenze**: i piani tecnici già scritti nelle feature (CORE-002, CORE-003) restano validi come base, ma vanno convertiti in issue prima di proseguire.
+
+## D-012 — Backend: date UTC, DB dei test, dipendenze di sviluppo
+- **Data**: 2026-11-15
+- **Stato**: accettata (issue CORE-002-BE-01)
+- **Decisione**:
+  - **Date**: tipo `UTCDateTime` (`backend/app/core/types.py`, `TypeDecorator`) per tutte le colonne data/ora: salva in UTC, restituisce datetime aware UTC, rifiuta i datetime naive.
+  - **Test**: ogni test usa un file SQLite temporaneo con lo schema creato dalle migrazioni Alembic (non `create_all`, non DB in memoria) e `get_db` sovrascritta.
+  - **Dipendenze di sviluppo** in `backend/requirements-dev.txt` (`-r requirements.txt` + strumenti di test), installate nello stage Docker `dev` e in CI; l'immagine prod non le contiene.
+- **Conseguenze**: ogni nuova colonna data/ora usa `UTCDateTime`; ogni migrazione è provata dai test.
 
 ## Rimandate all'implementazione della sezione calorie (CAL-001)
 - **Quale API esterna** per gli alimenti (es. Open Food Facts: gratuita, senza chiave, supporta i barcode; alternative: USDA FoodData Central, Edamam).

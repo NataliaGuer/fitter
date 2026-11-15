@@ -10,38 +10,61 @@ Guida per Claude Code (e per chiunque lavori al progetto).
 
 Viene hostata su un **Raspberry Pi** (architettura ARM, risorse limitate).
 
-## Documentazione delle feature: cartella `brain/`
+## Documentazione: cartella `brain/`
 
-`brain/` è la fonte di verità su *cosa* costruire e *perché*. Prima di implementare qualcosa:
+`brain/` è la fonte di verità su *cosa* costruire, *perché* e *come*:
+- `brain/features/`: le **feature** (cosa e perché: requisiti, criteri di accettazione).
+- `brain/issue/<feature>/`: le **issue** di ogni feature, una cartella per feature (come: piano tecnico e passi). **Si implementano solo le issue, mai direttamente le feature.**
+
+Prima di lavorare a qualcosa:
 1. Leggi `brain/README.md` (indice e convenzioni).
-2. Leggi il file della feature in `brain/features/` e le decisioni in `brain/decisioni.md`.
-3. Se la feature non è documentata, proponi di crearne il file partendo da `brain/_template-feature.md` prima di scrivere codice.
+2. Leggi l'issue in `brain/issue/<feature>/`, la feature a cui appartiene e le decisioni in `brain/decisioni.md`.
+3. Se la feature non è documentata, proponi di crearne il file partendo da `brain/_template-feature.md`.
+4. Se la feature non ha ancora issue, **non implementarla**: proponi di trasformarla in issue con la skill
+   `/feature-to-issue`.
 
-Dopo aver implementato: aggiorna lo **stato** nel file della feature e in `brain/backlog.md`.
 Ogni scelta architetturale non banale va registrata in `brain/decisioni.md`.
+
+## Flusso di lavoro: feature → issue → passi
+
+1. **Feature** (`brain/features/`): requisiti chiari, stato `approvata`.
+2. **Issue** (`brain/issue/<feature>/`, skill `/feature-to-issue`, modello `brain/_template-issue.md`):
+   - ogni issue riguarda **solo il backend** o **solo il frontend**;
+   - contiene il **piano tecnico** dettagliato e una lista di **passi incrementali**, ognuno con la propria
+     **definition of done** (DoD);
+   - nasce in stato `bozza` e va **approvata esplicitamente** dall'utente prima di scrivere codice.
+3. **Implementazione a passi** di un'issue approvata:
+   - si lavora **un passo alla volta**, nell'ordine del piano; stato del passo `in corso`;
+   - a fine passo si eseguono le verifiche della DoD e si riportano all'utente gli esiti (comandi lanciati,
+     risultati, cosa controllare a mano); stato del passo `in verifica`;
+   - **fermati e attendi**: solo l'utente stabilisce che il passo è concluso. Alla sua conferma il passo diventa
+     `fatto (AAAA-MM-GG)` e si può passare al successivo, non prima;
+   - ogni passo lascia `main` rilasciabile (CI verde);
+   - quando tutti i passi sono fatti: issue `fatta`; se tutte le issue della feature sono fatte, feature `fatta`.
+     Aggiorna sempre anche `brain/backlog.md`.
 
 ## Piano tecnico obbligatorio prima delle decisioni tecniche
 
-Quando implementi una feature e stai per prendere una **decisione tecnica**, **fermati e proponi un piano tecnico all'utente prima di scrivere codice**. Rientrano tra le decisioni tecniche, per esempio:
+Le **decisioni tecniche** si prendono nel piano tecnico dell'issue, mai durante l'implementazione. Rientrano tra le decisioni tecniche, per esempio:
 - scegliere o aggiungere una libreria/dipendenza;
 - creare o modificare tabelle, colonne, indici, vincoli (quindi ogni nuova migrazione Alembic);
 - definire come implementare un flusso (es. login, sincronizzazione con API esterna, calcolo dei macro);
 - definire o cambiare endpoint, formati di request/response, struttura dei moduli;
 - qualunque scelta con più alternative ragionevoli o difficile da annullare.
 
-Il piano va **documentato nel file della feature**, nella sezione `## Piano tecnico` (vedi `brain/_template-feature.md`), e deve contenere:
+Il piano va **documentato nell'issue**, nella sezione `## Piano tecnico` (vedi `brain/_template-issue.md`), e deve contenere:
 1. **Contesto**: cosa va deciso e perché.
 2. **Alternative** considerate, con pro e contro.
 3. **Proposta**: la soluzione raccomandata e il motivo.
 4. **Impatto**: file/moduli toccati, modifiche allo schema DB (tabelle/colonne, migrazione), nuove dipendenze, rischi.
-5. **Passi di implementazione** in ordine.
+5. **Passi** incrementali, ognuno con la sua definition of done.
 
 Flusso:
-1. Scrivi il piano nel file della feature con stato `proposto`.
-2. Presentalo all'utente in modo sintetico e **attendi l'approvazione esplicita**. Non implementare prima.
-3. Se l'utente chiede modifiche, aggiorna il piano e ripresentalo.
-4. Una volta approvato, segna il piano come `approvato` (con data) e registra le decisioni rilevanti in `brain/decisioni.md` (nuova voce `D-xxx`).
-5. Se durante l'implementazione il piano va cambiato, fermati, aggiorna il piano e chiedi di nuovo l'approvazione.
+1. Scrivi l'issue con stato `bozza`.
+2. Presentala all'utente in modo sintetico e **attendi l'approvazione esplicita**. Non implementare prima.
+3. Se l'utente chiede modifiche, aggiorna l'issue e ripresentala.
+4. Una volta approvata, segna l'issue come `approvata` (con data) e registra le decisioni rilevanti in `brain/decisioni.md` (nuova voce `D-xxx`).
+5. Se durante l'implementazione il piano va cambiato (nuova decisione tecnica, passi da aggiungere o modificare), fermati, aggiorna l'issue e chiedi di nuovo l'approvazione.
 
 Le decisioni già registrate in `brain/decisioni.md` non vanno riproposte: si applicano e basta. Le scelte banali (nomi di variabili locali, refactoring interni senza effetti esterni) non richiedono un piano.
 
@@ -69,7 +92,8 @@ docker-compose.dev.yaml  # dev: backend con --reload (8000) + Vite dev server (5
 script/start-dev.sh      # avvia l'ambiente di sviluppo
 .github/workflows/ci.yml # CI su ogni push/PR + rilascio immagine ARM64 su GHCR (D-008)
 deploy/                  # deploy pull-based sul Raspberry Pi (script + timer systemd, vedi deploy/README.md)
-brain/                   # documentazione feature e decisioni
+brain/                   # feature, issue e decisioni (vedi brain/README.md)
+.claude/skills/          # skill del progetto (es. feature-to-issue)
 ```
 
 Branch principale: **`main`**. Un push su `main` con `RELEASE_ENABLED=true` (variabile del repo GitHub) pubblica una nuova immagine, che il Pi installa entro 5 minuti: **`main` deve essere sempre rilasciabile** (CI verde).
@@ -104,7 +128,7 @@ File di ambiente: `.env` (prod) e `.env.dev` (dev) — non versionati.
 ### Multi-utente
 - L'app è multi-utente: ogni tabella con dati personali ha `user_id` e **ogni query è filtrata per l'utente autenticato**.
 - Un endpoint non deve mai esporre dati di altri utenti; aggiungere test che lo verifichino.
-- Autenticazione (D-006): cookie di sessione `HttpOnly` con sessioni nel DB; login con nickname + PIN di 4 cifre, salvato **solo come hash**. Il limite ai tentativi di login è obbligatorio (il PIN ha solo 10.000 combinazioni).
+- Autenticazione (D-006, D-009): cookie di sessione `HttpOnly` con sessioni nel DB, permanenti fino al logout; login con nickname + PIN di 4 cifre, salvato **solo come hash**. Per ora nessun limite ai tentativi: l'app è raggiungibile solo tramite VPN (D-009).
 
 ### Alimenti
 - La ricerca usa API esterne + il DB interno (alimenti inseriti dagli utenti). Vedi D-005 in `brain/decisioni.md`.

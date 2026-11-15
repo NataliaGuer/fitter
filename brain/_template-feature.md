@@ -1,7 +1,7 @@
 # <ID> — <Nome feature>
 
 - **Area**: allenamento | calorie | core
-- **Stato**: idea | da definire | pronta | in corso | fatta
+- **Stato**: idea | da definire | approvata | in corso | fatta
 - **Priorità**: alta | media | bassa
 - **Dipende da**: <ID di altre feature, se presenti>
 
@@ -43,19 +43,14 @@ Schermate e flusso principale (mobile-first).
 
 - ...
 
-## Piano tecnico
+## Issue
 
-- **Stato piano**: proposto | approvato (AAAA-MM-GG) | rivisto
-- **Contesto**: cosa va deciso e perché.
-- **Alternative**:
-  - A — ... (pro / contro)
-  - B — ... (pro / contro)
-- **Proposta**: soluzione scelta e motivazione.
-- **Impatto**: file/moduli, schema DB e migrazioni, nuove dipendenze, rischi.
-- **Passi**:
-  1. ...
-- **Decisioni registrate**: D-xxx
+Compilato da `/feature-to-issue`. Il piano tecnico e i passi stanno nelle issue, non qui.
 
-## Note di implementazione
+| ID | Lato | Stato | File |
+|----|------|-------|------|
+|    | backend / frontend | bozza | `issue/<nome-file-feature>/...` |
 
-Da compilare durante/dopo lo sviluppo.
+## Note
+
+Scostamenti emersi durante l'implementazione che cambiano requisiti o criteri.

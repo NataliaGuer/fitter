@@ -12,7 +12,12 @@ services:
       - .env.dev
     volumes:
       - ./backend/app:/backend/app
+      - ./backend/alembic:/backend/alembic
+      - ./backend/alembic.ini:/backend/alembic.ini
+      - ./backend/tests:/backend/tests
       - ./backend/requirements.txt:/backend/requirements.txt
+      - ./backend/requirements-dev.txt:/backend/requirements-dev.txt
+      - ./data:/data
     ports:
       - "127.0.0.1:8000:8000"
 
