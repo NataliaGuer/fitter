@@ -149,7 +149,7 @@ di 375 px di larghezza.
 
 ### Passo 3 — Client API e `AuthProvider`
 
-- **Stato**: da fare
+- **Stato**: fatto (2026-11-15)
 - **Obiettivo**: l'app sa all'avvio se l'utente è autenticato, anonimo o offline, e lo mostra.
 - **Lavoro**:
   - `src/api/client.ts`, `src/api/auth.ts`.
@@ -158,14 +158,15 @@ di 375 px di larghezza.
   - `App.tsx`: in base allo stato mostra caricamento, offline, oppure due segnaposto testuali "Accesso" /
     "Ciao, <nickname>" (sostituiti nei passi 4 e 5).
 - **Definition of done**:
-  - [ ] Senza cookie, aprendo l'app si vede brevemente il caricamento e poi il segnaposto "Accesso".
-  - [ ] Registrando un utente dalla console del browser (così il cookie finisce nel browser) con `fetch('/api/auth/register', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({nickname:'prova2', pin:'1234'})})`,
+  - [x] Senza cookie, aprendo l'app si vede brevemente il caricamento e poi il segnaposto "Accesso".
+  - [x] Registrando un utente dalla console del browser (così il cookie finisce nel browser) con `fetch('/api/auth/register', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({nickname:'prova2', pin:'1234'})})`,
         poi ricaricando la pagina si vede "Ciao, prova2".
-  - [ ] Fermato il backend (`docker compose -f docker-compose.dev.yaml stop app`) e ricaricata la pagina, si vede
+  - [x] Fermato il backend (`docker compose -f docker-compose.dev.yaml stop app`) e ricaricata la pagina, si vede
         la schermata offline con "Riprova", non il segnaposto "Accesso"; riavviato il backend, "Riprova" porta a
         "Ciao, prova2".
-  - [ ] In `src/` non compaiono `any` espliciti (`grep -rn ": any" src` senza risultati).
-  - [ ] `npm run lint` e `npm run build` senza errori; CI verde.
+  - [x] In `src/` non compaiono `any` espliciti (`grep -rn ": any" src` senza risultati).
+  - [x] `npm run lint` e `npm run build` senza errori; CI verde.
+        _CI non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
 
 ### Passo 4 — Schermata di accesso (Accedi / Registrati)
 
@@ -233,3 +234,21 @@ di 375 px di larghezza.
 - Esito verifiche locali: `curl -i http://localhost:5173/api/auth/me` → `401 {"detail":"Not authenticated"}`
   (risposta del backend tramite il proxy); anche `POST /api/auth/logout` passa (`204`); `dist/sw.js` contiene
   `denylist:[/^\/api\//]`; lint e build senza errori, bundle invariato.
+
+### Passo 3 (2026-11-15)
+- File creati: `src/api/{client,auth}.ts`, `src/auth/{context.ts,AuthProvider.tsx,useAuth.ts}`,
+  `src/components/CenteredScreen.tsx`, `src/pages/{LoadingScreen,OfflineScreen}.tsx`. Modificati: `src/App.tsx`
+  (sceglie la schermata in base allo stato, con segnaposto "Accesso" / "Ciao, <nickname>"), `src/main.tsx`
+  (`<AuthProvider>` intorno ad `<App>`).
+- Contesto, provider e hook in tre file separati (`context.ts`, `AuthProvider.tsx`, `useAuth.ts`), così ogni
+  file `.tsx` esporta solo componenti (requisito del fast refresh di Vite).
+- Stato `offline` per errori di rete **e** per qualunque risposta di `/me` diversa da `200`/`401` (5xx compresi):
+  con il backend fermo il proxy di Vite risponde `502`, in prod il reverse proxy risponde `502`/`504`.
+- `retry` riporta lo stato a `loading` e ripete `/me`; l'effetto ignora le risposte arrivate dopo lo smontaggio
+  (in sviluppo `StrictMode` esegue l'effetto due volte: due chiamate a `/me`, innocue).
+- `login`/`register`/`logout` del contesto propagano `ApiError`/`NetworkError`: i messaggi li mostra la UI
+  (passi 4 e 5).
+- Bundle: JS `306.03 kB` (gzip `96.66 kB`, +43 kB per `Button` e `Spinner` di HeroUI/React Aria), CSS invariato.
+- Esito verifiche locali: lint e build senza errori; nessun `any` in `src/`; backend fermo → `/api/auth/me` via
+  proxy `502`, riavviato → `401`. Le verifiche nel browser della DoD sono da fare a mano (nessun browser
+  disponibile qui).
