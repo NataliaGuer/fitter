@@ -132,7 +132,7 @@ Comando dei test usato sotto (ambiente dev avviato con `./script/start-dev.sh`):
 
 ### Passo 1 — Layer DB, Alembic e infrastruttura di test (CORE-001)
 
-- **Stato**: in verifica
+- **Stato**: fatto (2026-11-15)
 - **Obiettivo**: il backend si collega a SQLite con i PRAGMA giusti, Alembic è configurato (ancora senza
   revisioni), le migrazioni partono all'avvio del container e i test girano in locale e in CI.
 - **Lavoro**:
@@ -145,17 +145,18 @@ Comando dei test usato sotto (ambiente dev avviato con `./script/start-dev.sh`):
   - `main.py`: rimozione di `/items`.
   - `Dockerfile`, `docker-compose.dev.yaml`, `ci.yml` come da *Impatto*.
 - **Definition of done**:
-  - [ ] Il comando dei test termina con tutti i test verdi, inclusi `test_pragmas_wal_and_foreign_keys` e i test
+  - [x] Il comando dei test termina con tutti i test verdi, inclusi `test_pragmas_wal_and_foreign_keys` e i test
         di `UTCDateTime`.
-  - [ ] `docker compose -f docker-compose.dev.yaml logs app` mostra l'esecuzione di Alembic prima dell'avvio di
+  - [x] `docker compose -f docker-compose.dev.yaml logs app` mostra l'esecuzione di Alembic prima dell'avvio di
         Uvicorn, senza errori.
-  - [ ] Dopo l'avvio esiste il file `data/fitter.db` sull'host.
-  - [ ] `curl -i http://localhost:8000/items/1` risponde `404`.
+  - [x] Dopo l'avvio esiste il file `data/fitter.db` sull'host.
+  - [x] `curl -i http://localhost:8000/items/1` risponde `404`.
   - [ ] La CI del push è verde e il job `backend` esegue `pytest` (si vede nel log).
+        _Non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
 
 ### Passo 2 — Modelli `User` e `Session` e migrazione `0001`
 
-- **Stato**: da fare
+- **Stato**: fatto (2026-11-15)
 - **Obiettivo**: le tabelle `users` e `sessions` esistono nel DB tramite migrazione, con i vincoli previsti.
 - **Lavoro**:
   - `auth/models.py`: `User`, `Session` (stile `Mapped[...]` / `mapped_column`, date con `UTCDateTime`).
@@ -164,15 +165,16 @@ Comando dei test usato sotto (ambiente dev avviato con `./script/start-dev.sh`):
     CASCADE`, indice su `sessions.user_id`, `downgrade` completo).
   - `tests/test_models.py`.
 - **Definition of done**:
-  - [ ] Test verdi, inclusi: `test_nickname_unique_case_insensitive` (inserire `Mario` e poi `mario` genera
+  - [x] Test verdi, inclusi: `test_nickname_unique_case_insensitive` (inserire `Mario` e poi `mario` genera
         `IntegrityError`) e `test_delete_user_cascades_sessions`.
-  - [ ] `docker compose -f docker-compose.dev.yaml exec app alembic upgrade head` su DB vuoto (dopo aver
+  - [x] `docker compose -f docker-compose.dev.yaml exec app alembic upgrade head` su DB vuoto (dopo aver
         cancellato `data/fitter.db`) crea le tabelle;
         `docker compose -f docker-compose.dev.yaml exec app python -m sqlite3 /data/fitter.db "select sql from sqlite_master where name='users'"`
         mostra `COLLATE NOCASE` sulla colonna `nickname`.
-  - [ ] `alembic downgrade base` seguito da `alembic upgrade head` termina senza errori.
-  - [ ] `alembic check` risponde che non ci sono differenze tra modelli e migrazioni.
+  - [x] `alembic downgrade base` seguito da `alembic upgrade head` termina senza errori.
+  - [x] `alembic check` risponde che non ci sono differenze tra modelli e migrazioni.
   - [ ] CI verde.
+        _Non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
 
 ### Passo 3 — Servizio di autenticazione
 
@@ -250,4 +252,21 @@ Comando dei test usato sotto (ambiente dev avviato con `./script/start-dev.sh`):
 - FastAPI aggiornata a `0.163.1` (Starlette `1.10.0`, Pydantic `2.14.3`) su richiesta dell'utente: spariti i
   warning di deprecazione della vecchia Starlette su Python 3.14; test ancora verdi, `/items/1` → `404`.
   Sostituito `httpx` con `httpx2` in `requirements-dev.txt`: `pytest -W error` → 6 test verdi, nessun warning.
-- Verifica CI: richiede un push (nessun commit fatto finora).
+- Verifica CI: non eseguita (nessun push); l'utente ha chiuso il passo il 2026-11-15. Da controllare al primo push.
+
+### Passo 2 (2026-11-15)
+- File creati: `app/auth/{__init__,models}.py`, `alembic/versions/0001_users_sessions.py` (autogenerata e
+  riformattata a mano: il contenuto coincide con quello generato), `tests/test_models.py`. Modificati:
+  `app/core/db.py`, `alembic/env.py` (import dei modelli). Rimosso `alembic/versions/.gitkeep`.
+- Il modello delle sessioni si chiama **`UserSession`** (tabella `sessions`) invece di `Session`, per non
+  confondersi con `sqlalchemy.orm.Session` nel servizio e nelle dipendenze.
+- `Base.metadata` ha una **naming convention** per vincoli e indici (`pk_users`, `uq_users_nickname`,
+  `fk_sessions_user_id_users`, `ix_sessions_user_id`, ...): con SQLite in batch mode le migrazioni future possono
+  modificare o eliminare un vincolo solo se ha un nome.
+- Test aggiunto oltre a quelli previsti: `test_models_match_migrations`, l'equivalente di `alembic check` eseguito
+  in ogni test run (anche in CI).
+- Esito verifiche locali: 13 test verdi con `pytest -W error`; `upgrade head` su DB vuoto → revisione `0001`;
+  schema con `COLLATE "NOCASE"` su `nickname` e `ON DELETE CASCADE` su `sessions.user_id`; `downgrade base` +
+  `upgrade head` senza errori; `alembic check` → "No new upgrade operations detected".
+- Da Git Bash su Windows i comandi con un percorso del container (`/data/fitter.db`) vanno lanciati con
+  `MSYS_NO_PATHCONV=1`, altrimenti il percorso viene convertito in un percorso Windows.
