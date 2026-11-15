@@ -197,7 +197,7 @@ Comando dei test usato sotto (ambiente dev avviato con `./script/start-dev.sh`):
 
 ### Passo 4 — Endpoint di registrazione, login e logout
 
-- **Stato**: da fare
+- **Stato**: fatto (2026-11-15)
 - **Obiettivo**: `register`, `login` e `logout` funzionano secondo il contratto e impostano/cancellano il cookie.
 - **Lavoro**:
   - `auth/schemas.py`: `Credentials` (nickname, PIN con le regex sopra), `UserOut`.
@@ -205,16 +205,17 @@ Comando dei test usato sotto (ambiente dev avviato con `./script/start-dev.sh`):
   - `main.py`: `include_router(..., prefix="/api/auth")` prima del mount di `StaticFiles`.
   - `tests/test_auth_api.py` (prima parte).
 - **Definition of done**:
-  - [ ] Test verdi, inclusi: register `201` con cookie `fitter_session` `HttpOnly` e `SameSite=Lax`; register
+  - [x] Test verdi, inclusi: register `201` con cookie `fitter_session` `HttpOnly` e `SameSite=Lax`; register
         duplicato con maiuscole diverse `409`; nickname di 2 o 31 caratteri, con spazi o accenti `422`; PIN `123`,
         `12345`, `12a4` e `١٢٣٤` (cifre arabe) `422`; login corretto `200`; PIN errato e nickname inesistente
         `401` con lo stesso `detail`; logout `204` anche senza cookie.
-  - [ ] Test `test_cookie_secure_flag`: con `COOKIE_SECURE=true` il cookie ha l'attributo `Secure`.
-  - [ ] A mano, nell'ambiente dev:
+  - [x] Test `test_cookie_secure_flag`: con `COOKIE_SECURE=true` il cookie ha l'attributo `Secure`.
+  - [x] A mano, nell'ambiente dev:
         `curl -i -X POST localhost:8000/api/auth/register -H 'Content-Type: application/json' -d '{"nickname":"prova","pin":"1234"}'`
         risponde `201` con un header `set-cookie: fitter_session=...`.
-  - [ ] `http://localhost:8000/docs` mostra i tre endpoint sotto `/api/auth`.
+  - [x] `http://localhost:8000/docs` mostra i tre endpoint sotto `/api/auth`.
   - [ ] CI verde.
+        _Non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
 
 ### Passo 5 — `GET /api/auth/me` e dipendenza `current_user`
 
@@ -285,3 +286,19 @@ Comando dei test usato sotto (ambiente dev avviato con `./script/start-dev.sh`):
   maiuscole, verifica dell'hash fittizio per nickname inesistenti, hash non valido, token diversi per ogni
   sessione, logout idempotente.
 - Esito verifiche locali: 26 test verdi con `pytest -W error`; `/api/auth/me` → `404`.
+
+### Passo 4 (2026-11-15)
+- File creati: `app/auth/{schemas,router}.py`, `tests/test_auth_api.py`. Modificato: `app/main.py` (router
+  `/api/auth` registrato prima del mount di `StaticFiles`).
+- Endpoint sincroni (`def`): l'hash argon2 gira nel threadpool di FastAPI e non blocca l'event loop.
+- Testi di `detail`: `"Nickname already in use"` (409) e `"Invalid nickname or PIN"` (401), in inglese perché il
+  frontend mostra i propri messaggi in base allo status code.
+- Il login crea una nuova sessione anche se il browser ne ha già una: le sessioni precedenti restano valide fino
+  al loro logout (coerente con "nessuna gestione delle sessioni attive" della feature).
+- Il logout cancella il cookie con `Max-Age=0` e gli stessi attributi (`Path`, `HttpOnly`, `SameSite`, `Secure`).
+- Test aggiunti oltre a quelli previsti: nickname validi ai limiti (3 e 30 caratteri, `_`, `.`, `-`), PIN inviato
+  come numero JSON, campi mancanti, nessun cookie sulle risposte di errore, logout che elimina solo la propria
+  sessione, logout con cookie sconosciuto.
+- Esito verifiche locali: 55 test verdi con `pytest -W error`; `curl` di registrazione → `201` con
+  `set-cookie: fitter_session=...; HttpOnly; Max-Age=34560000; Path=/; SameSite=lax`; `/docs` mostra i tre endpoint.
+- Nel DB di sviluppo resta l'utente `prova` creato dalla verifica con `curl`.
