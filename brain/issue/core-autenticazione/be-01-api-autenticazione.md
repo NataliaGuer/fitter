@@ -178,7 +178,7 @@ Comando dei test usato sotto (ambiente dev avviato con `./script/start-dev.sh`):
 
 ### Passo 3 — Servizio di autenticazione
 
-- **Stato**: da fare
+- **Stato**: fatto (2026-11-15)
 - **Obiettivo**: le funzioni di dominio per PIN e sessioni esistono e sono testate, senza ancora esporre endpoint.
 - **Lavoro**:
   - `requirements.txt`: `argon2-cffi`.
@@ -187,12 +187,13 @@ Comando dei test usato sotto (ambiente dev avviato con `./script/start-dev.sh`):
     `get_user_by_token` (aggiorna `last_seen_at` se più vecchio di 24 ore), `delete_session`.
   - `tests/test_auth_service.py`.
 - **Definition of done**:
-  - [ ] Test verdi, inclusi: `test_pin_stored_as_argon2_hash` (`pin_hash` inizia con `$argon2id$` e non contiene
+  - [x] Test verdi, inclusi: `test_pin_stored_as_argon2_hash` (`pin_hash` inizia con `$argon2id$` e non contiene
         il PIN), `test_session_token_not_stored_in_clear`, `test_authenticate_wrong_pin_returns_none`,
         `test_authenticate_unknown_nickname_returns_none`, `test_last_seen_updated_at_most_daily`,
         `test_deleted_session_token_is_invalid`.
-  - [ ] Nessun nuovo endpoint: `curl -i http://localhost:8000/api/auth/me` risponde ancora `404`.
+  - [x] Nessun nuovo endpoint: `curl -i http://localhost:8000/api/auth/me` risponde ancora `404`.
   - [ ] CI verde.
+        _Non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
 
 ### Passo 4 — Endpoint di registrazione, login e logout
 
@@ -270,3 +271,17 @@ Comando dei test usato sotto (ambiente dev avviato con `./script/start-dev.sh`):
   `upgrade head` senza errori; `alembic check` → "No new upgrade operations detected".
 - Da Git Bash su Windows i comandi con un percorso del container (`/data/fitter.db`) vanno lanciati con
   `MSYS_NO_PATHCONV=1`, altrimenti il percorso viene convertito in un percorso Windows.
+
+### Passo 3 (2026-11-15)
+- File creati: `app/auth/service.py`, `tests/test_auth_service.py`. Modificato: `requirements.txt`
+  (`argon2-cffi==25.1.0`, installa `argon2-cffi-bindings` `26.2.0`, wheel `abi3`).
+- `PasswordHasher` con i parametri di default di argon2-cffi (argon2id, 64 MiB, 3 iterazioni, parallelismo 4).
+- Nickname già usato: `register_user` intercetta l'`IntegrityError`, fa rollback e solleva `NicknameTakenError`
+  (lo userà il router per il `409`).
+- L'hash fittizio per i nickname inesistenti viene calcolato alla prima richiesta e poi riusato (non all'import
+  del modulo, per non rallentare avvio e test).
+- `get_user_by_token` accetta un parametro `now` opzionale, usato dai test per simulare il passare del tempo.
+- Test aggiunti oltre a quelli previsti: nickname duplicato con maiuscole diverse, login che non distingue le
+  maiuscole, verifica dell'hash fittizio per nickname inesistenti, hash non valido, token diversi per ogni
+  sessione, logout idempotente.
+- Esito verifiche locali: 26 test verdi con `pytest -W error`; `/api/auth/me` → `404`.
