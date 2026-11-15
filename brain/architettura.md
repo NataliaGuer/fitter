@@ -23,4 +23,12 @@ In sviluppo frontend (Vite, :5173) e backend (:8000) girano in due container sep
 
 ## Modello dati
 
-Da definire man mano che le feature vengono documentate in `features/`.
+Date/ore in UTC con il tipo `UTCDateTime` (D-012); vincoli e indici con nomi standard (`pk_`, `uq_`, `fk_`, `ix_`).
+
+### core (CORE-002)
+- `users`: `id`, `nickname` (`COLLATE NOCASE`, unique), `pin_hash` (argon2id), `created_at`.
+- `sessions`: `id`, `token_hash` (SHA-256 del token del cookie, unique), `user_id` → `users.id`
+  (`ON DELETE CASCADE`), `created_at`, `last_seen_at`.
+
+Ogni tabella futura con dati personali ha `user_id` e gli endpoint usano la dipendenza `CurrentUser`
+(`backend/app/auth/deps.py`).

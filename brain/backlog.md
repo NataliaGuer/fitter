@@ -3,9 +3,9 @@
 | ID | Feature | Area | Stato | Priorità | File |
 |----|---------|------|-------|----------|------|
 | CORE-001 | Setup DB SQLite, SQLAlchemy e Alembic | core | fatta | alta | incluso nel piano di `features/core-autenticazione.md` |
-| CORE-002 | Utenti e autenticazione (nickname + PIN, sessione permanente) | core | in corso | alta | `features/core-autenticazione.md` |
+| CORE-002 | Utenti e autenticazione (nickname + PIN, sessione permanente) | core | fatta | alta | `features/core-autenticazione.md` |
 | CORE-002-BE | ↳ Autenticazione — backend | core | fatta | alta | `features/core-autenticazione.md` |
-| CORE-002-FE | ↳ Autenticazione — frontend | core | in corso | alta | `features/core-autenticazione.md` |
+| CORE-002-FE | ↳ Autenticazione — frontend | core | fatta | alta | `features/core-autenticazione.md` |
 | CORE-003 | CI/CD: verifica automatica e rilascio sul Raspberry Pi | core | in corso | alta | `features/core-ci-cd.md` |
 | CAL-001 | Catalogo alimenti: ricerca su API esterne + DB interno | calorie | da definire | alta | — |
 
@@ -16,7 +16,7 @@ Le feature si implementano solo tramite issue (`issue/<feature>/`, skill `/featu
 | ID | Issue | Feature | Lato | Stato | File |
 |----|-------|---------|------|-------|------|
 | CORE-002-BE-01 | Setup DB e API di autenticazione (include CORE-001) | CORE-002 | backend | fatta (2026-11-15) | `issue/core-autenticazione/be-01-api-autenticazione.md` |
-| CORE-002-FE-01 | Setup HeroUI, schermate di accesso e sessione | CORE-002 | frontend | in corso (approvata 2026-11-15) | `issue/core-autenticazione/fe-01-accesso-e-sessione.md` |
+| CORE-002-FE-01 | Setup HeroUI, schermate di accesso e sessione | CORE-002 | frontend | fatta (2026-11-15) | `issue/core-autenticazione/fe-01-accesso-e-sessione.md` |
 
 ## Aree
 

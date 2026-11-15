@@ -1,7 +1,7 @@
 # CORE-002 — Utenti e autenticazione
 
 - **Area**: core
-- **Stato**: in corso
+- **Stato**: fatta (2026-11-15)
 - **Priorità**: alta
 - **Dipende da**: CORE-001 (setup DB, incluso nel piano backend)
 
@@ -38,13 +38,13 @@ Permettere a più persone di usare l'app, ognuna con i propri dati, con un acces
 - [x] Messaggio di errore generico al login (non rivelare se il nickname esiste); tempo di risposta simile nei due casi.
 
 ### Frontend (CORE-002-FE)
-- [ ] Setup HeroUI + Tailwind (prima feature con UI, vedi D-007) e pulizia del boilerplate Vite.
-- [ ] All'avvio l'app verifica la sessione (`/api/auth/me`): se valida mostra direttamente la home, altrimenti la schermata di accesso.
-- [ ] Schermata di accesso con due modalità: "Accedi" / "Registrati".
-- [ ] Campo nickname + input PIN a 4 caselle con tastierino numerico.
-- [ ] Messaggi di errore chiari: credenziali errate, nickname già usato, input non valido.
-- [ ] Pulsante di logout (per ora nella home segnaposto).
-- [ ] Se il backend non è raggiungibile (offline) **non** si torna al login: si mostra un messaggio con "Riprova".
+- [x] Setup HeroUI + Tailwind (prima feature con UI, vedi D-007) e pulizia del boilerplate Vite.
+- [x] All'avvio l'app verifica la sessione (`/api/auth/me`): se valida mostra direttamente la home, altrimenti la schermata di accesso.
+- [x] Schermata di accesso con due modalità: "Accedi" / "Registrati".
+- [x] Campo nickname + input PIN a 4 caselle con tastierino numerico.
+- [x] Messaggi di errore chiari: credenziali errate, nickname già usato, input non valido.
+- [x] Pulsante di logout (per ora nella home segnaposto).
+- [x] Se il backend non è raggiungibile (offline) **non** si torna al login: si mostra un messaggio con "Riprova".
 
 ## Fuori scope
 
@@ -80,12 +80,12 @@ Errori nel formato standard FastAPI (`{"detail": ...}`).
 
 ## Criteri di accettazione
 
-- [ ] Non si possono registrare due utenti con lo stesso nickname (nemmeno con maiuscole o minuscole diverse).
-- [ ] Un PIN diverso da 4 cifre numeriche viene rifiutato.
-- [ ] Gli endpoint protetti rispondono `401` senza una sessione valida.
-- [ ] Chiudendo e riaprendo l'app (anche dopo settimane) l'utente è ancora autenticato.
-- [ ] Dopo il logout il vecchio cookie non dà più accesso.
-- [ ] Nel DB non c'è né il PIN né il token di sessione in chiaro.
+- [x] Non si possono registrare due utenti con lo stesso nickname (nemmeno con maiuscole o minuscole diverse).
+- [x] Un PIN diverso da 4 cifre numeriche viene rifiutato.
+- [x] Gli endpoint protetti rispondono `401` senza una sessione valida.
+- [x] Chiudendo e riaprendo l'app (anche dopo settimane) l'utente è ancora autenticato.
+- [x] Dopo il logout il vecchio cookie non dà più accesso.
+- [x] Nel DB non c'è né il PIN né il token di sessione in chiaro.
 
 ## Domande aperte
 
@@ -96,7 +96,7 @@ Errori nel formato standard FastAPI (`{"detail": ...}`).
 | ID | Lato | Stato | File |
 |----|------|-------|------|
 | CORE-002-BE-01 | backend | fatta (2026-11-15) | `issue/core-autenticazione/be-01-api-autenticazione.md` |
-| CORE-002-FE-01 | frontend | in corso (approvata 2026-11-15) | `issue/core-autenticazione/fe-01-accesso-e-sessione.md` |
+| CORE-002-FE-01 | frontend | fatta (2026-11-15) | `issue/core-autenticazione/fe-01-accesso-e-sessione.md` |
 
 Il piano tecnico qui sotto (flusso precedente a D-011) è la base delle issue; in caso di differenze vale l'issue.
 
@@ -176,4 +176,10 @@ Il piano tecnico qui sotto (flusso precedente a D-011) è la base delle issue; i
 
 ## Note di implementazione
 
-Da compilare durante/dopo lo sviluppo.
+Feature completata il 2026-11-15 con le issue `CORE-002-BE-01` e `CORE-002-FE-01` (dettagli nelle rispettive
+*Note di implementazione*). Scostamenti rispetto a questo file:
+- **Niente conferma del PIN** in registrazione: il PIN non è oscurato, l'utente lo vede mentre lo digita (decisione
+  dell'utente).
+- Nessuna tabella per i tentativi di login (`LoginFailure`, residuo di D-006): non serve con D-009.
+- Il modello delle sessioni si chiama `UserSession` (tabella `sessions`).
+- Verifiche ancora da fare: CI verde su GitHub e, con il rilascio attivo, prova sul Pi e da telefono tramite VPN.

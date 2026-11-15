@@ -1,23 +1,8 @@
-import { Card } from '@heroui/react'
-
 import { useAuth } from './auth/useAuth'
-import { CenteredScreen } from './components/CenteredScreen'
 import { AuthPage } from './pages/AuthPage'
+import { HomePage } from './pages/HomePage'
 import { LoadingScreen } from './pages/LoadingScreen'
 import { OfflineScreen } from './pages/OfflineScreen'
-
-// Temporary placeholder: replaced by HomePage (step 5) of CORE-002-FE-01.
-function Placeholder({ title }: { title: string }) {
-  return (
-    <CenteredScreen>
-      <Card className="w-full max-w-sm">
-        <Card.Header>
-          <Card.Title>{title}</Card.Title>
-        </Card.Header>
-      </Card>
-    </CenteredScreen>
-  )
-}
 
 function App() {
   const { state } = useAuth()
@@ -30,7 +15,7 @@ function App() {
     case 'anonymous':
       return <AuthPage />
     case 'authenticated':
-      return <Placeholder title={`Ciao, ${state.user.nickname}`} />
+      return <HomePage user={state.user} />
   }
 }
 

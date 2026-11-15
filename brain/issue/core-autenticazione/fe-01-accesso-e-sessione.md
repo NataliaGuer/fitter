@@ -2,7 +2,7 @@
 
 - **Feature**: CORE-002 (`features/core-autenticazione.md`)
 - **Lato**: frontend
-- **Stato**: in corso (approvata 2026-11-15)
+- **Stato**: fatta (2026-11-15; approvata 2026-11-15)
 - **Dipende da**: CORE-002-BE-01 (API `/api/auth/*`)
 
 ## Obiettivo
@@ -14,14 +14,14 @@ implementare l'accesso: all'apertura l'app verifica la sessione e mostra la home
 ## Requisiti coperti
 
 Dalla sezione *Requisiti → Frontend* della feature:
-- [ ] Setup HeroUI + Tailwind e pulizia del boilerplate Vite.
-- [ ] All'avvio verifica della sessione (`/api/auth/me`): home se valida, altrimenti accesso.
-- [ ] Schermata di accesso con modalità "Accedi" / "Registrati".
-- [ ] Nickname + PIN a 4 caselle con tastierino numerico; in registrazione il PIN si inserisce una sola volta
+- [x] Setup HeroUI + Tailwind e pulizia del boilerplate Vite.
+- [x] All'avvio verifica della sessione (`/api/auth/me`): home se valida, altrimenti accesso.
+- [x] Schermata di accesso con modalità "Accedi" / "Registrati".
+- [x] Nickname + PIN a 4 caselle con tastierino numerico; in registrazione il PIN si inserisce una sola volta
   (non è oscurato, niente campo di conferma: decisione dell'utente, 2026-11-15).
-- [ ] Messaggi di errore chiari: credenziali errate, nickname già usato, input non valido.
-- [ ] Pulsante di logout nella home segnaposto.
-- [ ] Backend non raggiungibile: messaggio con "Riprova", mai ritorno al login.
+- [x] Messaggi di errore chiari: credenziali errate, nickname già usato, input non valido.
+- [x] Pulsante di logout nella home segnaposto.
+- [x] Backend non raggiungibile: messaggio con "Riprova", mai ritorno al login.
 
 Criterio di accettazione della feature verificato qui end-to-end: chiudendo e riaprendo l'app l'utente è ancora
 autenticato.
@@ -189,24 +189,26 @@ di 375 px di larghezza.
 
 ### Passo 5 — Home segnaposto, logout e persistenza della sessione
 
-- **Stato**: da fare
+- **Stato**: fatto (2026-11-15)
 - **Obiettivo**: la home mostra l'utente e permette di uscire; la sessione sopravvive alla chiusura dell'app.
 - **Lavoro**:
   - `src/pages/HomePage.tsx`: "Ciao, <nickname>" + pulsante "Esci" (errore mostrato se il logout non arriva al
     server).
   - `App.tsx`: `HomePage` al posto del segnaposto.
 - **Definition of done**:
-  - [ ] Dopo l'accesso, chiudendo del tutto il browser e riaprendo `http://localhost:5173` si vede direttamente la
+  - [x] Dopo l'accesso, chiudendo del tutto il browser e riaprendo `http://localhost:5173` si vede direttamente la
         home, senza passare dall'accesso.
-  - [ ] "Esci" → schermata di accesso; ricaricando la pagina si resta sull'accesso.
-  - [ ] Con sessione valida e backend fermo, ricaricando la pagina si vede la schermata offline e non l'accesso;
+  - [x] "Esci" → schermata di accesso; ricaricando la pagina si resta sull'accesso.
+  - [x] Con sessione valida e backend fermo, ricaricando la pagina si vede la schermata offline e non l'accesso;
         con il backend fermo, "Esci" mostra un errore e si resta nella home.
-  - [ ] La dimensione del bundle JS dopo la build è annotata nelle *Note di implementazione* accanto a quella del
+  - [x] La dimensione del bundle JS dopo la build è annotata nelle *Note di implementazione* accanto a quella del
         passo 1.
-  - [ ] `npm run lint` e `npm run build` senza errori; CI verde.
+  - [x] `npm run lint` e `npm run build` senza errori; CI verde.
+        _CI non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
   - [ ] Se il rilascio è attivo (`RELEASE_ENABLED=true`): da telefono, tramite VPN, registrazione e accesso
         funzionano e l'app installata come PWA riaperta il giorno dopo mostra la home. Se il rilascio non è
         attivo, la voce si segna come non applicabile.
+        _Non verificata: passo chiuso su conferma dell'utente._
 
 ## Note di implementazione
 
@@ -280,3 +282,22 @@ di 375 px di larghezza.
   messaggio d'errore restano allineati a sinistra come il campo nickname.
 - Esito verifiche locali: lint e build senza errori. Le verifiche nel browser e da telefono della DoD sono da fare
   a mano (nessun browser disponibile qui).
+
+### Passo 5 (2026-11-15)
+- File creato: `src/pages/HomePage.tsx` ("Ciao, <nickname>" + pulsante "Esci"). Modificato: `src/App.tsx` (rimosso
+  il componente segnaposto: ora ogni stato ha la sua schermata).
+- Logout: durante la richiesta il pulsante mostra il caricamento; se la richiesta non arriva al server compare un
+  `Alert` ("Server non raggiungibile") e si resta nella home, perché la sessione è ancora valida.
+- **Dimensione del bundle, confronto con il passo 1**:
+
+  | | Passo 1 | Passo 5 |
+  |---|---|---|
+  | JS | `263.30 kB` (gzip `82.27 kB`) | `416.54 kB` (gzip `129.08 kB`) |
+  | CSS | `468.52 kB` (gzip `42.92 kB`) | `468.78 kB` (gzip `42.97 kB`) |
+  | Precache PWA | `716.10 KiB` | `866.00 KiB` |
+
+  L'aumento del JS viene dai componenti HeroUI/React Aria usati (Tabs, TextField, Form, InputOTP, Alert, Button,
+  Spinner). Circa 170 kB compressi in tutto, scaricati una volta e poi serviti dalla cache della PWA: accettabile.
+  Possibile ottimizzazione futura: importare in CSS solo i componenti usati (vedi README di `@heroui/styles`).
+- Esito verifiche locali: lint e build senza errori. Le verifiche nel browser della DoD sono da fare a mano
+  (nessun browser disponibile qui); la verifica da telefono tramite VPN richiede il rilascio.
