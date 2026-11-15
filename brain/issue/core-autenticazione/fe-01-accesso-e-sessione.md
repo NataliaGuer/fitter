@@ -17,7 +17,8 @@ Dalla sezione *Requisiti → Frontend* della feature:
 - [ ] Setup HeroUI + Tailwind e pulizia del boilerplate Vite.
 - [ ] All'avvio verifica della sessione (`/api/auth/me`): home se valida, altrimenti accesso.
 - [ ] Schermata di accesso con modalità "Accedi" / "Registrati".
-- [ ] Nickname + PIN a 4 caselle con tastierino numerico; in registrazione PIN ripetuto per conferma.
+- [ ] Nickname + PIN a 4 caselle con tastierino numerico; in registrazione il PIN si inserisce una sola volta
+  (non è oscurato, niente campo di conferma: decisione dell'utente, 2026-11-15).
 - [ ] Messaggi di errore chiari: credenziali errate, nickname già usato, input non valido.
 - [ ] Pulsante di logout nella home segnaposto.
 - [ ] Backend non raggiungibile: messaggio con "Riprova", mai ritorno al login.
@@ -45,8 +46,7 @@ intercetta `/api`, tema che segue il sistema, offline senza logout. I dettagli r
 
 - **Decisioni** (prese il 2026-11-15, D-013; solo dettagli non coperti da D-010):
   - *Validazione degli input lato client*: controlli semplici nel componente prima di inviare: lunghezza e
-    caratteri del nickname con la stessa regex del backend (`^[A-Za-z0-9_.-]{3,30}$`), PIN di 4 cifre, PIN e
-    conferma uguali. Il `422` del backend resta come ulteriore protezione. Errori immediati e in italiano, nessuna
+    caratteri del nickname con la stessa regex del backend (`^[A-Za-z0-9_.-]{3,30}$`), PIN di 4 cifre. Il `422` del backend resta come ulteriore protezione. Errori immediati e in italiano, nessuna
     dipendenza; la regola del nickname è duplicata tra frontend e backend.
     Scartato: libreria di form (es. react-hook-form + zod), due dipendenze per un solo form.
   - *Messaggi d'errore*: mappa status → messaggio in italiano nel frontend: `401` "Nickname o PIN non corretti",
@@ -63,7 +63,7 @@ intercetta `/api`, tema che segue il sistema, offline senza logout. I dettagli r
     `NetworkError` o `5xx` → offline.
   - `AuthPage`: `Tabs` HeroUI "Accedi" / "Registrati", `TextField`/`Input` per il nickname
     (`autocapitalize="none"`, `autocomplete="username"`), `InputOTP` a 4 caselle per il PIN
-    (`inputMode="numeric"`), in registrazione secondo `InputOTP` di conferma, `Button` a tutta larghezza con stato
+    (`inputMode="numeric"`), un solo `InputOTP` anche in registrazione, `Button` a tutta larghezza con stato
     di caricamento, `Alert` per gli errori.
   - Logout: se la chiamata non arriva al server la sessione resta valida, quindi si mostra l'errore e si resta
     nella home (non si passa ad `anonymous`).
@@ -170,21 +170,22 @@ di 375 px di larghezza.
 
 ### Passo 4 — Schermata di accesso (Accedi / Registrati)
 
-- **Stato**: da fare
+- **Stato**: fatto (2026-11-15)
 - **Obiettivo**: l'utente può registrarsi e accedere dall'app, con messaggi d'errore in italiano.
 - **Lavoro**:
-  - `src/pages/AuthPage.tsx` con `Tabs`, campo nickname, `InputOTP` per PIN (e conferma in registrazione),
+  - `src/pages/AuthPage.tsx` con `Tabs`, campo nickname, `InputOTP` per il PIN,
     validazione client, mappa degli errori per status, pulsante con stato di caricamento.
   - `App.tsx`: `AuthPage` al posto del segnaposto "Accesso".
 - **Definition of done**:
-  - [ ] Registrazione di un nuovo nickname con PIN e conferma uguali → si arriva a "Ciao, <nickname>".
-  - [ ] Registrazione di un nickname esistente scritto con maiuscole diverse → messaggio "Nickname già in uso".
-  - [ ] Accedi con PIN errato e con nickname inesistente → in entrambi i casi "Nickname o PIN non corretti".
-  - [ ] Nickname di 2 caratteri o con spazi, PIN incompleto, PIN e conferma diversi → messaggio d'errore mostrato
+  - [x] Registrazione di un nuovo nickname con un PIN di 4 cifre → si arriva a "Ciao, <nickname>".
+  - [x] Registrazione di un nickname esistente scritto con maiuscole diverse → messaggio "Nickname già in uso".
+  - [x] Accedi con PIN errato e con nickname inesistente → in entrambi i casi "Nickname o PIN non corretti".
+  - [x] Nickname di 2 caratteri o con spazi, PIN incompleto → messaggio d'errore mostrato
         senza che parta la richiesta (tab *Network* di DevTools vuota).
-  - [ ] In vista mobile: nessuno scroll orizzontale, pulsante a tutta larghezza, il campo PIN ha
+  - [x] In vista mobile: nessuno scroll orizzontale, pulsante a tutta larghezza, il campo PIN ha
         `inputmode="numeric"` (visibile ispezionando l'elemento) e da telefono apre il tastierino numerico.
-  - [ ] `npm run lint` e `npm run build` senza errori; CI verde.
+  - [x] `npm run lint` e `npm run build` senza errori; CI verde.
+        _CI non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
 
 ### Passo 5 — Home segnaposto, logout e persistenza della sessione
 
@@ -252,3 +253,30 @@ di 375 px di larghezza.
 - Esito verifiche locali: lint e build senza errori; nessun `any` in `src/`; backend fermo → `/api/auth/me` via
   proxy `502`, riavviato → `401`. Le verifiche nel browser della DoD sono da fare a mano (nessun browser
   disponibile qui).
+
+### Passo 4 (2026-11-15)
+- File creati: `src/pages/AuthPage.tsx`, `src/components/PinInput.tsx`, `src/auth/validation.ts`,
+  `src/api/errors.ts`. Modificato: `src/App.tsx` (`AuthPage` al posto del segnaposto "Accesso").
+- `AuthPage`: `Tabs` HeroUI "Accedi" / "Registrati"; ogni tab ha il proprio form, quindi cambiando tab i campi
+  ripartono vuoti. Componenti HeroUI: `Card`, `Tabs`, `Form`, `TextField` + `Label`/`Input`/`FieldError`,
+  `InputOTP`, `Alert`, `Button` (`isPending` durante la richiesta).
+- `PinInput`: `InputOTP` a 4 caselle con `inputMode="numeric"` e `pattern` solo cifre (le lettere non si possono
+  digitare); `autoComplete` `current-password` in accesso e `new-password` in registrazione, così il browser può
+  proporre di salvare il PIN invece di suggerire codici SMS (default di `input-otp`: `one-time-code`).
+- Validazione al submit (`validation.ts`, stesse regole del backend): con errori i messaggi compaiono sotto i campi
+  e la richiesta non parte.
+- `errors.ts`: messaggi in italiano per status (D-013): `401` in accesso "Nickname o PIN non corretti", `409` in
+  registrazione "Nickname già in uso", `422` "Dati non validi", errore di rete o `5xx` "Server non raggiungibile",
+  altro "Si è verificato un errore, riprova".
+- Bundle: JS `416.30 kB` (gzip `129.12 kB`, +110 kB per Tabs, TextField, Form, InputOTP, Alert), CSS invariato.
+- Campi (nickname e PIN) con `variant="secondary"` di HeroUI, su richiesta dell'utente: con la variante di default
+  lo sfondo dei campi ha lo stesso colore della `Card` (bianco su bianco nel tema chiaro, grigio scuro su grigio
+  scuro in quello scuro) e i campi non si distinguono. `secondary` usa il colore `--default`: più chiaro della card
+  nel tema scuro, grigio leggero in quello chiaro. Nessun CSS custom. Regola da seguire per i campi dentro una card.
+- **Tolto il campo "Conferma PIN"** dalla registrazione, su decisione dell'utente: il PIN non è oscurato e l'utente
+  lo vede mentre lo digita, quindi la conferma non serve. Aggiornati requisito e sezione UI della feature, requisiti,
+  dettagli e DoD di questa issue; rimossa `pinConfirmError` da `validation.ts`.
+- Caselle del PIN centrate (`className="justify-center"` su `InputOTP`), su richiesta dell'utente; etichetta e
+  messaggio d'errore restano allineati a sinistra come il campo nickname.
+- Esito verifiche locali: lint e build senza errori. Le verifiche nel browser e da telefono della DoD sono da fare
+  a mano (nessun browser disponibile qui).

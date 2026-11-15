@@ -75,7 +75,7 @@ Errori nel formato standard FastAPI (`{"detail": ...}`).
 ## UI
 
 - **Avvio**: schermata di caricamento breve mentre si verifica la sessione.
-- **Accesso**: tab "Accedi" / "Registrati"; campo nickname; PIN a 4 caselle (`inputmode="numeric"`); pulsante a tutta larghezza. In registrazione il PIN va inserito due volte (conferma).
+- **Accesso**: tab "Accedi" / "Registrati"; campo nickname; PIN a 4 caselle (`inputmode="numeric"`); pulsante a tutta larghezza. In registrazione il PIN si inserisce una sola volta: non è oscurato, quindi l'utente lo vede mentre lo digita (decisione dell'utente, 2026-11-15).
 - **Home** (segnaposto finché non ci sono altre feature): "Ciao, <nickname>" + pulsante "Esci".
 
 ## Criteri di accettazione
