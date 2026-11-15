@@ -118,6 +118,14 @@ Formato: una sezione per decisione, la più recente in fondo.
   - **Dipendenze di sviluppo** in `backend/requirements-dev.txt` (`-r requirements.txt` + strumenti di test), installate nello stage Docker `dev` e in CI; l'immagine prod non le contiene.
 - **Conseguenze**: ogni nuova colonna data/ora usa `UTCDateTime`; ogni migrazione è provata dai test.
 
+## D-013 — Frontend: validazione degli input e messaggi d'errore
+- **Data**: 2026-11-15
+- **Stato**: accettata (issue CORE-002-FE-01)
+- **Decisione**:
+  - **Validazione** dei form con controlli semplici nei componenti, senza librerie di form; le regole replicano quelle del backend, che resta la verifica definitiva (`422`).
+  - **Messaggi d'errore** in italiano decisi dal frontend in base allo **status code** HTTP (ed errore di rete); il `detail` del backend non viene mostrato all'utente.
+- **Conseguenze**: una regola di validazione cambiata nel backend va aggiornata anche nel frontend; i testi di `detail` del backend possono restare in inglese.
+
 ## Rimandate all'implementazione della sezione calorie (CAL-001)
 - **Quale API esterna** per gli alimenti (es. Open Food Facts: gratuita, senza chiave, supporta i barcode; alternative: USDA FoodData Central, Edamam).
 - **Visibilità degli alimenti inseriti dagli utenti**: privati per l'utente che li crea o condivisi con tutti?

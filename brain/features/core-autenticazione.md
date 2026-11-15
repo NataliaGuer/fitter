@@ -96,7 +96,7 @@ Errori nel formato standard FastAPI (`{"detail": ...}`).
 | ID | Lato | Stato | File |
 |----|------|-------|------|
 | CORE-002-BE-01 | backend | fatta (2026-11-15) | `issue/core-autenticazione/be-01-api-autenticazione.md` |
-| CORE-002-FE-01 | frontend | bozza | `issue/core-autenticazione/fe-01-accesso-e-sessione.md` |
+| CORE-002-FE-01 | frontend | in corso (approvata 2026-11-15) | `issue/core-autenticazione/fe-01-accesso-e-sessione.md` |
 
 Il piano tecnico qui sotto (flusso precedente a D-011) è la base delle issue; in caso di differenze vale l'issue.
 

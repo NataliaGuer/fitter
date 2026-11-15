@@ -2,7 +2,7 @@
 
 - **Feature**: CORE-002 (`features/core-autenticazione.md`)
 - **Lato**: frontend
-- **Stato**: bozza
+- **Stato**: in corso (approvata 2026-11-15)
 - **Dipende da**: CORE-002-BE-01 (API `/api/auth/*`)
 
 ## Obiettivo
@@ -36,24 +36,23 @@ autenticato.
 
 Le scelte di fondo sono già decise e **non si ripropongono** (D-007, D-010): HeroUI v3 + Tailwind 4, nessun
 router, `AuthProvider` con React context, wrapper su `fetch`, proxy Vite per `/api`, service worker che non
-intercetta `/api`, tema che segue il sistema, offline senza logout.
+intercetta `/api`, tema che segue il sistema, offline senza logout. I dettagli rimanenti sono decisi sotto
+(D-013).
 
 - **Contesto**: `frontend/` è il boilerplate Vite: `App.tsx` vuoto, `App.css` e `index.css` con lo stile del
   template, asset di esempio in `src/assets/` (`hero.png`, `react.svg`, `vite.svg`). `vite.config.ts` ha già
   `vite-plugin-pwa` ma né proxy né regola per `/api`. Nessuna dipendenza UI.
 
-- **Alternative** (solo dettagli non coperti da D-010):
-  - *Validazione degli input lato client*
-    - A — controlli semplici nel componente (lunghezza e caratteri del nickname con la stessa regex del backend,
-      PIN di 4 cifre, PIN e conferma uguali) prima di inviare; il `422` del backend resta come rete di sicurezza
-      (pro: errori immediati e in italiano, nessuna dipendenza / contro: la regola del nickname è duplicata).
-    - B — libreria di form (es. react-hook-form + zod) (contro: due dipendenze per un solo form).
-  - *Messaggi d'errore*
-    - A — mappa status → messaggio in italiano nel frontend (`401` "Nickname o PIN non corretti", `409` "Nickname
-      già in uso", `422` "Dati non validi", errore di rete "Server non raggiungibile") (pro: il testo è sotto
-      controllo della UI, il backend può restare in inglese / contro: nessuno rilevante).
-    - B — mostrare il `detail` del backend (contro: testi tecnici e in inglese).
-- **Proposta**: A in entrambi i casi.
+- **Decisioni** (prese il 2026-11-15, D-013; solo dettagli non coperti da D-010):
+  - *Validazione degli input lato client*: controlli semplici nel componente prima di inviare: lunghezza e
+    caratteri del nickname con la stessa regex del backend (`^[A-Za-z0-9_.-]{3,30}$`), PIN di 4 cifre, PIN e
+    conferma uguali. Il `422` del backend resta come ulteriore protezione. Errori immediati e in italiano, nessuna
+    dipendenza; la regola del nickname è duplicata tra frontend e backend.
+    Scartato: libreria di form (es. react-hook-form + zod), due dipendenze per un solo form.
+  - *Messaggi d'errore*: mappa status → messaggio in italiano nel frontend: `401` "Nickname o PIN non corretti",
+    `409` "Nickname già in uso", `422` "Dati non validi", errore di rete "Server non raggiungibile". Il testo è
+    sotto il controllo della UI e il backend resta in inglese.
+    Scartato: mostrare il `detail` del backend (testi tecnici e in inglese).
 
 - **Dettagli**:
   - `src/api/client.ts`: `apiFetch<T>(path, options)` su `fetch` con `credentials: 'same-origin'`, JSON in/out;
@@ -99,8 +98,7 @@ intercetta `/api`, tema che segue il sistema, offline senza logout.
   - Rischi: peso del bundle (si annota la dimensione dopo il passo 1 e la si confronta alla fine); esempi online di
     HeroUI spesso riferiti alla v2 (API diverse): fare riferimento alla documentazione v3.
 
-- **Decisioni registrate**: D-010 (già esistente); nuove da registrare all'approvazione (validazione client
-  semplice, messaggi d'errore mappati per status).
+- **Decisioni registrate**: D-010 (già esistente), D-013 (validazione client, messaggi d'errore).
 
 ## Passi
 
@@ -115,7 +113,7 @@ di 375 px di larghezza.
 
 ### Passo 1 — Setup Tailwind 4 + HeroUI v3 e pulizia del boilerplate
 
-- **Stato**: da fare
+- **Stato**: fatto (2026-11-15)
 - **Obiettivo**: il frontend usa HeroUI e Tailwind, senza più nulla del template Vite.
 - **Lavoro**:
   - installazione delle dipendenze; plugin `@tailwindcss/vite` in `vite.config.ts`.
@@ -123,14 +121,15 @@ di 375 px di larghezza.
   - rimozione di `App.css` e degli asset di esempio; `App.tsx` mostra una schermata segnaposto "Fitter" con un
     componente HeroUI (es. `Card`).
 - **Definition of done**:
-  - [ ] `npm run lint` e `npm run build` senza errori; la dimensione del bundle JS stampata dalla build è annotata
+  - [x] `npm run lint` e `npm run build` senza errori; la dimensione del bundle JS stampata dalla build è annotata
         nelle *Note di implementazione*.
-  - [ ] `npm ls @heroui/react tailwindcss` mostra `3.2.7` e `4.3.5`, senza peer dependency mancanti.
-  - [ ] `src/App.css`, `src/assets/hero.png`, `react.svg`, `vite.svg` non esistono più e nessun file in `src/` li
+  - [x] `npm ls @heroui/react tailwindcss` mostra `3.2.7` e `4.3.5`, senza peer dependency mancanti.
+  - [x] `src/App.css`, `src/assets/hero.png`, `react.svg`, `vite.svg` non esistono più e nessun file in `src/` li
         importa.
-  - [ ] Su `http://localhost:5173` si vede la schermata segnaposto con il componente HeroUI; cambiando il tema del
+  - [x] Su `http://localhost:5173` si vede la schermata segnaposto con il componente HeroUI; cambiando il tema del
         sistema (o emulandolo in DevTools) passa da chiaro a scuro.
   - [ ] CI verde.
+        _Non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
 
 ### Passo 2 — Proxy `/api` e service worker
 
@@ -208,4 +207,20 @@ di 375 px di larghezza.
 
 ## Note di implementazione
 
-Da compilare durante lo sviluppo.
+### Passo 1 (2026-11-15)
+- Dipendenze installate: `@heroui/react@3.2.7`, `@heroui/styles@3.2.7`, `react-aria@3.53.1`,
+  `react-aria-components@1.22.1`, `@react-aria/ssr`, `@react-aria/utils`, `@internationalized/date`; di sviluppo
+  `tailwindcss@4.3.5`, `@tailwindcss/vite@4.3.5`. `npm audit`: 0 vulnerabilità.
+- `src/index.css`: solo `@import "tailwindcss"` + `@import "@heroui/styles"` (ordine richiesto da HeroUI).
+- **Tema che segue il sistema**: HeroUI v3 attiva il tema scuro solo con la classe `dark` e `data-theme="dark"`
+  su `<html>`, senza seguire `prefers-color-scheme` da solo. Un piccolo script inline in `index.html` imposta
+  classe/attributo prima del primo render (niente lampo di tema chiaro) e li aggiorna quando cambia il tema del
+  sistema. Nessuna dipendenza aggiunta (niente `next-themes` o simili).
+- `<body>` con le classi `bg-background text-foreground` del tema HeroUI.
+- Rimossi `src/App.css`, `src/assets/{hero.png,react.svg,vite.svg}` (cartella `src/assets/` eliminata).
+  `App.tsx` mostra una `Card` HeroUI segnaposto.
+- **Dimensione del bundle (passo 1)**: JS `263.30 kB` (gzip `82.27 kB`), CSS `468.52 kB` (gzip `42.92 kB`),
+  precache PWA `716.10 KiB`. Il CSS è grande perché `@heroui/styles` include gli stili di tutti i componenti:
+  se servirà, si possono importare solo quelli usati (vedi README di `@heroui/styles`).
+- Container dev del frontend ricostruito con `up -d --build -V frontend` (`-V` rinnova il volume anonimo di
+  `node_modules`, altrimenti restano le dipendenze vecchie).

@@ -16,7 +16,7 @@ Le feature si implementano solo tramite issue (`issue/<feature>/`, skill `/featu
 | ID | Issue | Feature | Lato | Stato | File |
 |----|-------|---------|------|-------|------|
 | CORE-002-BE-01 | Setup DB e API di autenticazione (include CORE-001) | CORE-002 | backend | fatta (2026-11-15) | `issue/core-autenticazione/be-01-api-autenticazione.md` |
-| CORE-002-FE-01 | Setup HeroUI, schermate di accesso e sessione | CORE-002 | frontend | bozza | `issue/core-autenticazione/fe-01-accesso-e-sessione.md` |
+| CORE-002-FE-01 | Setup HeroUI, schermate di accesso e sessione | CORE-002 | frontend | in corso (approvata 2026-11-15) | `issue/core-autenticazione/fe-01-accesso-e-sessione.md` |
 
 ## Aree
 
