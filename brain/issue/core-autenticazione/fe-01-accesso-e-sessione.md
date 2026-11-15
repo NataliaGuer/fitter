@@ -133,18 +133,19 @@ di 375 px di larghezza.
 
 ### Passo 2 — Proxy `/api` e service worker
 
-- **Stato**: da fare
+- **Stato**: fatto (2026-11-15)
 - **Obiettivo**: in sviluppo il frontend parla con il backend sulla stessa origine; in prod il service worker non
   serve mai `/api` dalla cache.
 - **Lavoro**:
   - `vite.config.ts`: `server.proxy` per `/api` con `API_PROXY_TARGET`; `workbox.navigateFallbackDenylist`.
   - `docker-compose.dev.yaml`: `API_PROXY_TARGET=http://app:8000` nel servizio `frontend`.
 - **Definition of done**:
-  - [ ] Con l'ambiente dev avviato, `curl -i http://localhost:5173/api/auth/me` risponde `401` (risposta del
+  - [x] Con l'ambiente dev avviato, `curl -i http://localhost:5173/api/auth/me` risponde `401` (risposta del
         backend arrivata tramite il proxy).
-  - [ ] Dopo `npm run build`, il file `dist/sw.js` contiene la regola `/^\/api\//` nel `NavigationRoute`
+  - [x] Dopo `npm run build`, il file `dist/sw.js` contiene la regola `/^\/api\//` nel `NavigationRoute`
         (verificabile con una ricerca testuale di `api` in `dist/sw.js`).
-  - [ ] `npm run lint` e `npm run build` senza errori; CI verde.
+  - [x] `npm run lint` e `npm run build` senza errori; CI verde.
+        _CI non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
 
 ### Passo 3 — Client API e `AuthProvider`
 
@@ -224,3 +225,11 @@ di 375 px di larghezza.
   se servirà, si possono importare solo quelli usati (vedi README di `@heroui/styles`).
 - Container dev del frontend ricostruito con `up -d --build -V frontend` (`-V` rinnova il volume anonimo di
   `node_modules`, altrimenti restano le dipendenze vecchie).
+
+### Passo 2 (2026-11-15)
+- `vite.config.ts`: `server.proxy['/api']` verso `API_PROXY_TARGET` (default `http://localhost:8000`, per chi
+  avvia Vite fuori da Docker); `workbox.navigateFallbackDenylist: [/^\/api\//]`.
+- `docker-compose.dev.yaml`: `API_PROXY_TARGET=http://app:8000` nel servizio `frontend`.
+- Esito verifiche locali: `curl -i http://localhost:5173/api/auth/me` → `401 {"detail":"Not authenticated"}`
+  (risposta del backend tramite il proxy); anche `POST /api/auth/logout` passa (`204`); `dist/sw.js` contiene
+  `denylist:[/^\/api\//]`; lint e build senza errori, bundle invariato.

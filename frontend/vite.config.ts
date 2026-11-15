@@ -3,6 +3,10 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// In dev the backend runs elsewhere (docker: http://app:8000): Vite proxies /api so that
+// frontend and API share the same origin, as in prod (D-010).
+const apiProxyTarget = process.env.API_PROXY_TARGET ?? 'http://localhost:8000'
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
@@ -10,6 +14,10 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        // Never answer /api requests with the cached index.html (D-010).
+        navigateFallbackDenylist: [/^\/api\//],
+      },
       manifest: {
         name: 'Fitter',
         short_name: 'Fitter',
@@ -32,6 +40,11 @@ export default defineConfig({
     port: 5173,
     watch: {
       usePolling: true,
+    },
+    proxy: {
+      '/api': {
+        target: apiProxyTarget,
+      },
     },
   },
   build: {
