@@ -126,6 +126,26 @@ Formato: una sezione per decisione, la più recente in fondo.
   - **Messaggi d'errore** in italiano decisi dal frontend in base allo **status code** HTTP (ed errore di rete); il `detail` del backend non viene mostrato all'utente.
 - **Conseguenze**: una regola di validazione cambiata nel backend va aggiornata anche nel frontend; i testi di `detail` del backend possono restare in inglese.
 
+## D-014 — Frontend: icone, date e barra di navigazione
+- **Data**: 2026-11-17
+- **Stato**: accettata (issue CORE-004-FE-01)
+- **Decisione**:
+  - **Icone** con `@gravity-ui/icons` (set usato dalla documentazione HeroUI v3); scartati `lucide-react` e SVG a mano.
+  - **Date lato client** con `@internationalized/date` (già presente come peer di HeroUI) e `Intl.DateTimeFormat('it-IT')`; settimana da lunedì, fuso del dispositivo. Niente `date-fns` o simili.
+  - **Barra di navigazione** floating in basso, solo icone, composta con `Button` HeroUI + Tailwind (non `Tabs`), voce centrale "Start" in evidenza; `safe-area-inset-bottom` con `viewport-fit=cover`.
+  - **Swipe** con gli eventi touch di React (soglia 50 px, prevalenza orizzontale), senza librerie di gesture né `scroll-snap`.
+- **Conseguenze**: ogni nuova icona viene da `@gravity-ui/icons`; i calcoli di calendario non usano `Date` a mano.
+
+## D-015 — Frontend: stile neobrutalista, font e cambio di tema
+- **Data**: 2026-11-17
+- **Stato**: accettata (issue CORE-005-FE-01)
+- **Decisione**:
+  - **Stile neobrutalista** (`brain/DESIGN.md`) applicato come **tema HeroUI**: variabili CSS di HeroUI ridefinite in `src/theme.css`, più token Tailwind (`@theme`) e utility (`@utility`, es. ombra piena ed effetto pressione) per ciò che HeroUI non copre. È l'unico posto con CSS nostro; niente librerie di componenti neobrutaliste.
+  - **Font DM Sans** con `@fontsource-variable/dm-sans` servito dall'app e messo nella cache della PWA (niente Google Fonts).
+  - **Due temi**: chiaro **Coral & Cream** (primario corallo `#E8635A`) e scuro **Dark Brut** (primario giallo `#FFE566`); testo nero sul colore primario in entrambi (contrasto ≥ 4.5:1).
+  - **Scelta del tema** dell'utente salvata in `localStorage` (`fitter-theme`), applicata dallo script inline di `index.html` prima del primo render; senza scelta si segue il sistema. Modifica D-010 (prima: sempre il sistema).
+- **Conseguenze**: le nuove schermate ereditano lo stile dal tema; i colori si prendono dai token, mai valori esadecimali sparsi nei componenti; la scelta del tema non passa tra dispositivi (eventuale preferenza sul profilo: futura issue backend).
+
 ## Rimandate all'implementazione della sezione calorie (CAL-001)
 - **Quale API esterna** per gli alimenti (es. Open Food Facts: gratuita, senza chiave, supporta i barcode; alternative: USDA FoodData Central, Edamam).
 - **Visibilità degli alimenti inseriti dagli utenti**: privati per l'utente che li crea o condivisi con tutti?

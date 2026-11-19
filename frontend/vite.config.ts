@@ -17,14 +17,16 @@ export default defineConfig({
       workbox: {
         // Never answer /api requests with the cached index.html (D-010).
         navigateFallbackDenylist: [/^\/api\//],
+        // Precache the self-hosted font too (D-015), so it works offline.
+        globPatterns: ['**/*.{js,css,html,svg,woff2}'],
       },
       manifest: {
         name: 'Fitter',
         short_name: 'Fitter',
         start_url: '/',
         display: 'standalone',
-        background_color: '#ffffff',
-        theme_color: '#ffffff',
+        background_color: '#FAFADF',
+        theme_color: '#FAFADF',
         icons: [
           {
             src: 'icons/heart.png',

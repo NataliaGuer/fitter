@@ -1,3 +1,7 @@
 /* Tailwind CSS 4 + HeroUI v3 (D-010). Order matters: tailwindcss first. */
 @import "tailwindcss";
 @import "@heroui/styles";
+/* Self-hosted DM Sans, weight axis only (D-015). */
+@import "@fontsource-variable/dm-sans/wght.css";
+/* Neobrutalist theme: after HeroUI, so its variables and component overrides win. */
+@import "./theme.css";

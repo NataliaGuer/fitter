@@ -21,7 +21,6 @@ export function PinInput({ label, value, onChange, error, autoComplete }: PinInp
       <Label id={labelId}>{label}</Label>
       <InputOTP
         maxLength={PIN_LENGTH}
-        variant="secondary"
         className="justify-center"
         pattern={REGEXP_ONLY_DIGITS}
         inputMode="numeric"

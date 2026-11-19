@@ -3,21 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Fitter</title>
+    <meta name="theme-color" content="#FAFADF" />
     <script>
-      // The theme follows the system setting (D-010). HeroUI v3 needs the "dark" class and
-      // data-theme on <html>; set here, before the first render, to avoid a flash of light theme.
+      // Theme (D-015): the user's choice saved on this device, otherwise the system setting.
+      // Runs before the first render to avoid a flash of the wrong theme. Same logic as src/theme/theme.ts.
       (function () {
+        var KEY = 'fitter-theme';
+        var COLORS = { light: '#FAFADF', dark: '#111111' };
         var query = window.matchMedia('(prefers-color-scheme: dark)');
-        function apply() {
-          var theme = query.matches ? 'dark' : 'light';
-          document.documentElement.classList.toggle('dark', theme === 'dark');
-          document.documentElement.setAttribute('data-theme', theme);
-          document.documentElement.style.colorScheme = theme;
+        function stored() {
+          try {
+            var value = localStorage.getItem(KEY);
+            return value === 'light' || value === 'dark' ? value : null;
+          } catch (e) {
+            return null;
+          }
         }
-        apply();
-        query.addEventListener('change', apply);
+        function apply(theme) {
+          var root = document.documentElement;
+          root.classList.toggle('dark', theme === 'dark');
+          root.classList.toggle('light', theme === 'light');
+          root.setAttribute('data-theme', theme);
+          root.style.colorScheme = theme;
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', COLORS[theme]);
+        }
+        apply(stored() || (query.matches ? 'dark' : 'light'));
+        // Follow system changes only while the user has not chosen a theme.
+        query.addEventListener('change', function () {
+          if (stored() === null) apply(query.matches ? 'dark' : 'light');
+        });
       })();
     </script>
   </head>

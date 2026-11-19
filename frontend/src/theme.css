@@ -1,0 +1,201 @@
+/*
+ * Neobrutalist theme for HeroUI v3 (D-015, brain/DESIGN.md).
+ * Light = Coral & Cream, dark = Dark Brut. The theme class (light/dark) and data-theme are set on <html>
+ * by the inline script in index.html.
+ *
+ * HeroUI variables overridden here (check them when upgrading HeroUI): --background, --foreground, --surface,
+ * --surface-secondary, --surface-tertiary, --overlay, --muted, --default, --default-foreground, --accent,
+ * --accent-foreground, --danger, --danger-foreground, --border, --separator, --focus, --border-width, --radius,
+ * --field-background, --field-border, --field-border-width, --field-radius, --surface-shadow, --overlay-shadow,
+ * --field-shadow, --field-border-focus, --segment, --segment-foreground. Component classes touched: .card,
+ * .button--{primary,secondary,tertiary,outline,danger}, .switch__control, .switch__thumb, .alert,
+ * .tabs__list-container, .tabs__tab, .tabs__indicator.
+ */
+
+/* Fonts, palette accents and hard shadows as Tailwind tokens (font-sans, bg-brut-*, shadow-brut*). */
+@theme inline {
+  --font-sans: 'DM Sans Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --color-brut-coral: #e8635a;
+  --color-brut-violet: #7b6cf6;
+  --color-brut-mint: #4ecdc4;
+  --color-brut-yellow: #ffe566;
+  --color-brut-pink: #f9a8b8;
+  --color-brut-lavender: #c4b5fd;
+  --color-brut-ink: var(--brut-ink);
+  /* Fixed black, for text and icons on pastel colors in both themes. */
+  --color-brut-black: #111111;
+  /* Highlight for active items: yellow in light, lavender in dark (where yellow is the primary). */
+  --color-brut-highlight: var(--brut-highlight);
+
+  /* Zero blur, always. */
+  --shadow-brut-sm: 3px 3px 0 0 var(--brut-ink);
+  --shadow-brut: 4px 4px 0 0 var(--brut-ink);
+  --shadow-brut-lg: 6px 6px 0 0 var(--brut-ink);
+}
+
+/* Physical press: the element moves into its (3px) shadow, which shrinks and disappears. */
+@utility press-brut {
+  box-shadow: var(--shadow-brut-sm);
+  transition:
+    transform 100ms ease,
+    box-shadow 100ms ease,
+    background-color 100ms ease;
+
+  @media (hover: hover) {
+    &:hover {
+      transform: translate(1px, 1px);
+      box-shadow: 2px 2px 0 0 var(--brut-ink);
+    }
+  }
+
+  &:active,
+  &[data-pressed='true'] {
+    transform: translate(3px, 3px);
+    box-shadow: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &,
+    &:hover,
+    &:active,
+    &[data-pressed='true'] {
+      transform: none;
+      transition: none;
+    }
+  }
+}
+
+@layer base {
+  :root,
+  .light,
+  [data-theme='light'] {
+    color-scheme: light;
+    --brut-ink: #111111;
+    --brut-highlight: #ffe566;
+
+    --background: #fafadf;
+    --foreground: #111111;
+    --surface: #ffffff;
+    --surface-secondary: #f4f4d4;
+    --surface-tertiary: #ecebc6;
+    --overlay: #ffffff;
+    --muted: #555555;
+    --default: #f4f4d4;
+    --default-foreground: #111111;
+
+    --accent: #e8635a;
+    /* Black on coral: ~5.7:1 (white would be ~3.3:1, below WCAG AA). */
+    --accent-foreground: #111111;
+    --danger: #b3261e;
+    --danger-foreground: #ffffff;
+
+    --field-background: #ffffff;
+  }
+
+  .dark,
+  [data-theme='dark'] {
+    color-scheme: dark;
+    --brut-ink: #ffffff;
+    --brut-highlight: #c4b5fd;
+
+    --background: #111111;
+    --foreground: #ffffff;
+    --surface: #1c1c1c;
+    --surface-secondary: #262626;
+    --surface-tertiary: #303030;
+    --overlay: #1c1c1c;
+    --muted: #bbbbbb;
+    --default: #262626;
+    --default-foreground: #ffffff;
+
+    /* Dark Brut: yellow primary, black text on it (~16:1). */
+    --accent: #ffe566;
+    --accent-foreground: #111111;
+    --danger: #ff6b6b;
+    --danger-foreground: #111111;
+
+    --field-background: #1c1c1c;
+  }
+
+  /* Shared by both themes: everything is drawn with the ink color. */
+  :root,
+  .light,
+  [data-theme='light'],
+  .dark,
+  [data-theme='dark'] {
+    --border: var(--brut-ink);
+    --separator: var(--brut-ink);
+    --focus: var(--accent);
+    --border-width: 2px;
+    --radius: 0.5rem;
+
+    --field-border: var(--brut-ink);
+    --field-border-width: 2px;
+    --field-radius: 0.375rem;
+
+    --surface-shadow: 4px 4px 0 0 var(--brut-ink);
+    --overlay-shadow: 6px 6px 0 0 var(--brut-ink);
+    --field-shadow: 3px 3px 0 0 var(--brut-ink);
+    /* Focused fields: border in the primary color. */
+    --field-border-focus: var(--accent);
+
+    /* Selected tab: highlight color with black text. */
+    --segment: var(--brut-highlight);
+    --segment-foreground: #111111;
+  }
+}
+
+@layer components {
+  .card {
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-xl);
+  }
+
+  .button--primary,
+  .button--secondary,
+  .button--tertiary,
+  .button--outline,
+  .button--danger {
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-lg);
+    @apply press-brut;
+  }
+}
+
+/* Switch (theme switch): bordered track, flat thumb. */
+@layer components {
+  .switch__control {
+    border: var(--border-width) solid var(--border);
+  }
+
+  .switch__thumb,
+  .switch[data-selected='true'] .switch__thumb {
+    box-shadow: none;
+  }
+}
+
+/* Alerts and tabs (access screen). */
+@layer components {
+  .alert {
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-brut-sm);
+  }
+
+  .tabs__list-container {
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+
+  .tabs__tab {
+    border-radius: var(--radius-md);
+    font-weight: 600;
+  }
+
+  .tabs__indicator {
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: none;
+  }
+}

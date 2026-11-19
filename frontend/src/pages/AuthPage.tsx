@@ -6,6 +6,7 @@ import { useAuth } from '../auth/useAuth'
 import { nicknameError, pinError } from '../auth/validation'
 import { CenteredScreen } from '../components/CenteredScreen'
 import { PinInput } from '../components/PinInput'
+import { Sparkle } from '../components/Sparkle'
 
 type Mode = 'login' | 'register'
 
@@ -53,10 +54,9 @@ function AuthForm({ mode }: { mode: Mode }) {
 
   return (
     <Form className="flex flex-col gap-4" validationBehavior="aria" onSubmit={handleSubmit}>
-      {/* variant="secondary": fields inside a Card, otherwise they have the same color as the Card. */}
+      {/* Default variant: with the neobrutalist theme the field border separates it from the Card (D-015). */}
       <TextField
         fullWidth
-        variant="secondary"
         name="nickname"
         value={nickname}
         onChange={setNickname}
@@ -96,9 +96,10 @@ function AuthForm({ mode }: { mode: Mode }) {
 export function AuthPage() {
   return (
     <CenteredScreen>
-      <Card className="w-full max-w-sm">
-        <Card.Header>
-          <Card.Title>Fitter</Card.Title>
+      <Card className="w-full max-w-sm shadow-brut-lg">
+        <Card.Header className="flex-row items-center justify-center gap-2">
+          <Card.Title className="text-4xl font-extrabold tracking-tight">fitter</Card.Title>
+          <Sparkle className="size-8 rotate-12" fillClassName="fill-brut-pink" />
         </Card.Header>
         <Card.Content>
           <Tabs defaultSelectedKey="login">

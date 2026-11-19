@@ -8,9 +8,9 @@ export function OfflineScreen() {
 
   return (
     <CenteredScreen>
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-sm shadow-brut-lg">
         <Card.Header>
-          <Card.Title>Server non raggiungibile</Card.Title>
+          <Card.Title className="text-2xl font-extrabold tracking-tight">server non raggiungibile</Card.Title>
           <Card.Description>Controlla la connessione (o la VPN) e riprova.</Card.Description>
         </Card.Header>
         <Card.Footer>
