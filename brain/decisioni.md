@@ -146,6 +146,17 @@ Formato: una sezione per decisione, la più recente in fondo.
   - **Scelta del tema** dell'utente salvata in `localStorage` (`fitter-theme`), applicata dallo script inline di `index.html` prima del primo render; senza scelta si segue il sistema. Modifica D-010 (prima: sempre il sistema).
 - **Conseguenze**: le nuove schermate ereditano lo stile dal tema; i colori si prendono dai token, mai valori esadecimali sparsi nei componenti; la scelta del tema non passa tra dispositivi (eventuale preferenza sul profilo: futura issue backend).
 
+## D-016 — Catalogo esercizi: dataset RepDB nell'immagine, caricato nel DB all'avvio
+- **Data**: 2026-11-21
+- **Stato**: accettata (issue ALL-001-BE-01)
+- **Decisione**:
+  - **Dataset** dal pacchetto npm `@repdb/exercises`, versione **esatta** fissata solo in `frontend/package.json`; nella build Docker lo stage `backend` copia `exercises.json` e `package.json` del pacchetto dallo stage `frontend` in `/backend/dataset/` (`EXERCISES_DATASET_DIR`). Dataset e immagini non entrano nel repo; i nomi italiani stanno in `backend/app/exercises/names_it.json` (versionato).
+  - **Schema**: tabella `exercises` senza `user_id` (dati comuni, sola lettura), chiave = `id` del dataset; muscoli in colonne JSON (non tabella collegata); immagini come solo nome di file; `is_active = false` per gli esercizi spariti dal dataset, che non si cancellano mai.
+  - **Caricamento** con `python -m app.exercises.sync` all'avvio del container, tra migrazioni e Uvicorn: una sola transazione, upsert per `id`, saltato se l'impronta SHA-256 (dataset + nomi italiani + `LOADER_VERSION`) coincide con quella salvata in `exercise_catalog_state`. Un fallimento **non blocca l'avvio** dell'app; un dataset incompatibile viene fermato in build (verifica nello stage `backend`).
+  - **Ricerca** su colonna `search_text` (nome italiano + inglese normalizzati in Python: `casefold` e senza accenti) con `LIKE` per parola; scartati `COLLATE NOCASE` e FTS5.
+  - **Rotte del frontend**: il mount statico restituisce `index.html` per le `GET` senza file corrispondente, tranne i percorsi `/api/` e quelli con estensione.
+- **Conseguenze**: aggiornare il catalogo = cambiare la versione in `frontend/package.json` e rilasciare; le tabelle future (routine, sessioni) possono avere una chiave esterna su `exercises.id`; attribuzione "Exercise data by RepDB" obbligatoria in `README.md` e nell'app.
+
 ## Rimandate all'implementazione della sezione calorie (CAL-001)
 - **Quale API esterna** per gli alimenti (es. Open Food Facts: gratuita, senza chiave, supporta i barcode; alternative: USDA FoodData Central, Edamam).
 - **Visibilità degli alimenti inseriti dagli utenti**: privati per l'utente che li crea o condivisi con tutti?

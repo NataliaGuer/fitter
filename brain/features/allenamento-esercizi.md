@@ -1,7 +1,7 @@
 # ALL-001 — Catalogo esercizi
 
 - **Area**: allenamento
-- **Stato**: da definire
+- **Stato**: in corso
 - **Priorità**: alta
 - **Dipende da**: CORE-002 (utente autenticato)
 
@@ -36,9 +36,10 @@ sul Pi e nessuna chiamata a servizi esterni a runtime.
 
   Se manca una traduzione si mostra il nome inglese. Quando una nuova versione del pacchetto aggiunge esercizi,
   quelli senza nome italiano vengono segnalati nei log dal caricamento.
-- [ ] **Dataset nell'immagine**: nella build Docker lo stage backend copia `exercises.json` e il file dei nomi
-  italiani dallo stage frontend, dove il pacchetto è già installato. La versione resta fissata in un solo posto
-  (`frontend/package.json`) e vale sia in sviluppo sia in produzione.
+- [ ] **Dataset nell'immagine**: nella build Docker lo stage backend copia `exercises.json` dallo stage
+  frontend, dove il pacchetto è già installato. La versione resta fissata in un solo posto
+  (`frontend/package.json`) e vale sia in sviluppo sia in produzione. Il file dei nomi italiani è versionato nel
+  backend, che è l'unico a leggerlo.
 - [ ] **Catalogo nel database**: gli esercizi stanno in una tabella del DB SQLite, caricata **automaticamente
   all'avvio del container**, dopo le migrazioni e prima di Uvicorn: nessun comando da lanciare a mano.
   - Se la versione del dataset è già nel DB il caricamento non fa nulla.
@@ -132,8 +133,8 @@ muscoli.
 
 ## Domande aperte
 
-- **Router**: la prima schermata oltre la home richiede il router (D-010 lo prevede con la prima feature a più
-  pagine). Scelta della libreria nell'issue frontend.
+Nessuna. Le scelte tecniche rimaste (es. libreria di routing, che D-010 prevede con la prima feature a più
+pagine) si prendono nel piano tecnico delle issue.
 
 ## Issue
 
@@ -141,7 +142,8 @@ Compilato da `/feature-to-issue`. Il piano tecnico e i passi stanno nelle issue,
 
 | ID | Lato | Stato | File |
 |----|------|-------|------|
-|    |      |       |      |
+| ALL-001-BE-01 | backend | in corso (approvata 2026-11-21) | `issue/allenamento-esercizi/be-01-catalogo-esercizi.md` |
+| ALL-001-FE-01 | frontend | bozza | `issue/allenamento-esercizi/fe-01-catalogo-esercizi.md` |
 
 ## Note
 
@@ -158,3 +160,4 @@ Compilato da `/feature-to-issue`. Il piano tecnico e i passi stanno nelle issue,
   frontend nella build Docker e caricato nel DB in automatico all'avvio del container (scartati: comando
   manuale, che sul Pi richiederebbe un passo a mano; catalogo solo in memoria senza tabella, che lascerebbe
   routine e sessioni senza chiave esterna e con riferimenti vuoti se un esercizio sparisce dal dataset).
+- 2026-11-21: feature approvata dall'utente.

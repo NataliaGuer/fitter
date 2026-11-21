@@ -21,6 +21,11 @@ RUN pip install --no-cache-dir --upgrade -r /backend/requirements.txt
 COPY ./backend/alembic.ini /backend/alembic.ini
 COPY ./backend/alembic /backend/alembic
 COPY ./backend/app /backend/app
+# Dataset esercizi (ALL-001): la versione è fissata solo in frontend/package.json
+COPY --from=frontend \
+    /frontend/node_modules/@repdb/exercises/exercises.json \
+    /frontend/node_modules/@repdb/exercises/package.json \
+    /backend/dataset/
 
 # Migrazioni applicate a ogni avvio del container (D-003, D-009)
 FROM backend AS dev

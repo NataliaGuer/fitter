@@ -9,7 +9,7 @@
 | CORE-003 | CI/CD: verifica automatica e rilascio sul Raspberry Pi | core | in corso | alta | `features/core-ci-cd.md` |
 | CORE-004 | Home page a card e barra di navigazione | core | fatta | alta | `features/core-home.md` |
 | CORE-005 | Restyling neobrutalista (palette, font, tema HeroUI) | core | fatta | media | `features/core-design-neobrutalista.md` |
-| ALL-001 | Catalogo esercizi (dataset RepDB nel DB, nomi in italiano) | allenamento | da definire | alta | `features/allenamento-esercizi.md` |
+| ALL-001 | Catalogo esercizi (dataset RepDB nel DB, nomi in italiano) | allenamento | in corso | alta | `features/allenamento-esercizi.md` |
 | ALL-002 | Mappa muscolare con MuscleMap-ts nel dettaglio esercizio | allenamento | da definire | media | `features/allenamento-mappa-muscolare.md` |
 | CAL-001 | Catalogo alimenti: ricerca su API esterne + DB interno | calorie | da definire | alta | — |
 
@@ -23,6 +23,8 @@ Le feature si implementano solo tramite issue (`issue/<feature>/`, skill `/featu
 | CORE-002-FE-01 | Setup HeroUI, schermate di accesso e sessione | CORE-002 | frontend | fatta (2026-11-15) | `issue/core-autenticazione/fe-01-accesso-e-sessione.md` |
 | CORE-004-FE-01 | Home a card con calendario settimanale e barra di navigazione | CORE-004 | frontend | fatta (2026-11-17) | `issue/core-home/fe-01-home-e-navigazione.md` |
 | CORE-005-FE-01 | Tema neobrutalista per HeroUI e restyling delle schermate | CORE-005 | frontend | fatta (2026-11-17) | `issue/core-design-neobrutalista/fe-01-tema-neobrutalista.md` |
+| ALL-001-BE-01 | Catalogo esercizi: dataset RepDB nel DB e API | ALL-001 | backend | in corso (approvata 2026-11-21) | `issue/allenamento-esercizi/be-01-catalogo-esercizi.md` |
+| ALL-001-FE-01 | Catalogo esercizi: router, schermata Esercizi e dettaglio | ALL-001 | frontend | bozza | `issue/allenamento-esercizi/fe-01-catalogo-esercizi.md` |
 
 ## Aree
 
