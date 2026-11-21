@@ -145,7 +145,6 @@ di 375 px di larghezza.
   - [x] Dopo `npm run build`, il file `dist/sw.js` contiene la regola `/^\/api\//` nel `NavigationRoute`
         (verificabile con una ricerca testuale di `api` in `dist/sw.js`).
   - [x] `npm run lint` e `npm run build` senza errori; CI verde.
-        _CI non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
 
 ### Passo 3 — Client API e `AuthProvider`
 
@@ -166,7 +165,6 @@ di 375 px di larghezza.
         "Ciao, prova2".
   - [x] In `src/` non compaiono `any` espliciti (`grep -rn ": any" src` senza risultati).
   - [x] `npm run lint` e `npm run build` senza errori; CI verde.
-        _CI non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
 
 ### Passo 4 — Schermata di accesso (Accedi / Registrati)
 
@@ -185,7 +183,6 @@ di 375 px di larghezza.
   - [x] In vista mobile: nessuno scroll orizzontale, pulsante a tutta larghezza, il campo PIN ha
         `inputmode="numeric"` (visibile ispezionando l'elemento) e da telefono apre il tastierino numerico.
   - [x] `npm run lint` e `npm run build` senza errori; CI verde.
-        _CI non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
 
 ### Passo 5 — Home segnaposto, logout e persistenza della sessione
 
@@ -204,7 +201,6 @@ di 375 px di larghezza.
   - [x] La dimensione del bundle JS dopo la build è annotata nelle *Note di implementazione* accanto a quella del
         passo 1.
   - [x] `npm run lint` e `npm run build` senza errori; CI verde.
-        _CI non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
   - [ ] Se il rilascio è attivo (`RELEASE_ENABLED=true`): da telefono, tramite VPN, registrazione e accesso
         funzionano e l'app installata come PWA riaperta il giorno dopo mostra la home. Se il rilascio non è
         attivo, la voce si segna come non applicabile.

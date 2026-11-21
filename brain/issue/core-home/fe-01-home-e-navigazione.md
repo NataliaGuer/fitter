@@ -90,7 +90,6 @@ Verifiche manuali in dev (`./script/start-dev.sh`, `http://localhost:5173`), vis
   - [x] In vista mobile: nessuno scroll orizzontale, la barra resta in basso staccata dai bordi e scorrendo l'ultima card è
         interamente visibile sopra la barra; funziona in tema chiaro e scuro.
   - [x] `npm run lint` e `npm run build` senza errori; dimensione del bundle annotata.
-        _CI non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
 
 ### Passo 2 — Card calendario settimanale
 
@@ -109,7 +108,6 @@ Verifiche manuali in dev (`./script/start-dev.sh`, `http://localhost:5173`), vis
   - [x] Il giorno di oggi ha `aria-current="date"`.
   - [x] In vista mobile i 7 giorni stanno su una riga senza scroll orizzontale.
   - [x] `npm run lint` e `npm run build` senza errori; nessun `any` in `src/`.
-        _CI non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
 
 ### Passo 3 — Scorrimento delle settimane
 
@@ -140,7 +138,6 @@ Verifiche manuali in dev (`./script/start-dev.sh`, `http://localhost:5173`), vis
         ("28 dic – 3 gen", senza anno), verificato con uno script su date fisse.
   - [x] Il titolo resta centrato e in vista mobile frecce, titolo e 7 giorni stanno senza scroll orizzontale.
   - [x] `npm run lint` e `npm run build` senza errori; nessun `any` in `src/`.
-        _CI non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
 
 ## Note di implementazione
 

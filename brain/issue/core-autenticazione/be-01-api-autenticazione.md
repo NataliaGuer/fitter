@@ -256,7 +256,6 @@ Comando dei test usato sotto (ambiente dev avviato con `./script/start-dev.sh`):
 - FastAPI aggiornata a `0.163.1` (Starlette `1.10.0`, Pydantic `2.14.3`) su richiesta dell'utente: spariti i
   warning di deprecazione della vecchia Starlette su Python 3.14; test ancora verdi, `/items/1` → `404`.
   Sostituito `httpx` con `httpx2` in `requirements-dev.txt`: `pytest -W error` → 6 test verdi, nessun warning.
-- Verifica CI: non eseguita (nessun push); l'utente ha chiuso il passo il 2026-11-15. Da controllare al primo push.
 
 ### Passo 2 (2026-11-15)
 - File creati: `app/auth/{__init__,models}.py`, `alembic/versions/0001_users_sessions.py` (autogenerata e

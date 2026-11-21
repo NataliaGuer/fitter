@@ -132,7 +132,6 @@ Verifiche manuali in dev (`http://localhost:5173`), vista mobile = DevTools a 37
         di contrasto di DevTools indica almeno 4.5:1; anche il testo secondario sullo sfondo supera 4.5:1 in
         entrambi i temi.
   - [x] `npm run lint` e `npm run build` senza errori; dimensione del bundle annotata.
-        _CI non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
 
 ### Passo 2 — Home: card, calendario e barra di navigazione
 
@@ -151,7 +150,6 @@ Verifiche manuali in dev (`http://localhost:5173`), vista mobile = DevTools a 37
   - [x] Tutti i punti sopra valgono in entrambi i temi (in scuro: oggi e Start gialli, bordi e ombre bianchi).
   - [x] In vista mobile nessuno scroll orizzontale; l'ultima card resta visibile sopra la barra.
   - [x] `npm run lint` e `npm run build` senza errori.
-        _CI non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
 
 ### Passo 3 — Accesso, caricamento e offline
 
@@ -168,7 +166,6 @@ Verifiche manuali in dev (`http://localhost:5173`), vista mobile = DevTools a 37
   - [x] Login, registrazione e "Riprova" funzionano come prima.
   - [x] Con `prefers-reduced-motion: reduce` (DevTools → Rendering) i pulsanti non si spostano.
   - [x] `npm run lint` e `npm run build` senza errori; dimensione del bundle annotata e confrontata con il passo 1.
-        _CI non verificata: nessun push al momento della chiusura; passo chiuso su conferma dell'utente._
 
 ## Note di implementazione
 
