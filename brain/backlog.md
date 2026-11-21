@@ -9,6 +9,8 @@
 | CORE-003 | CI/CD: verifica automatica e rilascio sul Raspberry Pi | core | in corso | alta | `features/core-ci-cd.md` |
 | CORE-004 | Home page a card e barra di navigazione | core | fatta | alta | `features/core-home.md` |
 | CORE-005 | Restyling neobrutalista (palette, font, tema HeroUI) | core | fatta | media | `features/core-design-neobrutalista.md` |
+| ALL-001 | Catalogo esercizi (dataset RepDB nel DB, nomi in italiano) | allenamento | da definire | alta | `features/allenamento-esercizi.md` |
+| ALL-002 | Mappa muscolare con MuscleMap-ts nel dettaglio esercizio | allenamento | da definire | media | `features/allenamento-mappa-muscolare.md` |
 | CAL-001 | Catalogo alimenti: ricerca su API esterne + DB interno | calorie | da definire | alta | — |
 
 ## Issue
@@ -25,7 +27,8 @@ Le feature si implementano solo tramite issue (`issue/<feature>/`, skill `/featu
 ## Aree
 
 ### Allenamento in palestra
-Nessuna feature definita.
+- ALL-001 — Catalogo esercizi: pacchetto npm `@repdb/exercises` (708 esercizi, immagini incluse) caricato in SQLite, nomi tradotti in italiano, ricerca e filtri; attribuzione RepDB.
+- ALL-002 — Mappa muscolare: installazione di `MuscleMap-ts` (versione fissata) e figura con muscolo target e secondari nel dettaglio esercizio. Dipende da ALL-001.
 
 ### Tracciamento calorie
 - CAL-001 — Catalogo alimenti (D-005): ricerca su API esterne, inserimento manuale degli alimenti non trovati, copia locale dei valori nutrizionali.
