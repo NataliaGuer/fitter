@@ -4,5 +4,6 @@
 data
 docs
 **/__pycache__
+**/.venv
 frontend/node_modules
 frontend/dist

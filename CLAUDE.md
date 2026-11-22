@@ -10,6 +10,31 @@ Guida per Claude Code (e per chiunque lavori al progetto).
 
 Viene hostata su un **Raspberry Pi** (architettura ARM, risorse limitate).
 
+## Chi scrive cosa (D-017)
+
+L'utente usa il progetto per **imparare Python**: sa già programmare in altri linguaggi.
+
+- **Backend (`backend/`)**: il codice lo scrive **l'utente** (applicazione, test, migrazioni Alembic), comprese
+  le modifiche al `Dockerfile` che servono al backend.
+  Claude **non crea né modifica file sotto `backend/`**, né quelle parti del `Dockerfile`, senza una richiesta
+  esplicita. Su richiesta spiega,
+  risponde a domande, fa review ed esegue verifiche; non anticipa soluzioni complete non richieste.
+- **Frontend (`frontend/`)**: lo scrive **Claude**, con il flusso feature → issue → passi descritto sotto.
+- **Feature**: si decidono **insieme** (requisiti, criteri di accettazione). Per il backend non serve altro:
+  l'utente implementa partendo dalla feature e le decisioni tecniche del backend sono sue. L'issue backend e il
+  suo piano tecnico sono **facoltativi** (si scrivono solo se l'utente li chiede).
+- **Contratto API**: è la frontiera tra i due lati e si concorda insieme prima dell'issue frontend, nella
+  sezione "Contratto" di quell'issue. Se il backend lo cambia, va aggiornata l'issue frontend.
+- Restano validi per entrambi i lati i vincoli di "Regole e vincoli" e `main` sempre rilasciabile (CI verde).
+  Le decisioni non banali del backend si registrano comunque in `brain/decisioni.md` (può scriverle Claude su
+  indicazione dell'utente).
+- Il backend si sviluppa **nel container `app`** dell'ambiente dev, non in un virtualenv locale: sul PC
+  dell'utente il Controllo applicazioni di Windows blocca gli eseguibili non firmati (`pip.exe`, ecc.).
+  Shell nel container: `docker compose -f docker-compose.dev.yaml exec app bash`.
+
+Dove le sezioni seguenti parlano di issue, piano tecnico e passi obbligatori, per il backend vale quanto scritto
+qui.
+
 ## Documentazione: cartella `brain/`
 
 `brain/` è la fonte di verità su *cosa* costruire, *perché* e *come*:

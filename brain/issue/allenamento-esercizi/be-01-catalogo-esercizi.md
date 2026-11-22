@@ -175,6 +175,11 @@ Si applicano D-001, D-003, D-004, D-009, D-012: SQLite, SQLAlchemy 2.x + Alembic
 ## Passi
 
 Stati del passo: `da fare` → `in corso` → `in verifica` → `fatto (AAAA-MM-GG)`.
+
+**Chi scrive (D-017, dal 2026-11-22)**: i passi 1 e 2 li ha scritti Claude. I passi 3, 5 e 6 li scrive
+l'utente (codice, test e modifiche al `Dockerfile`); il piano qui sotto resta come guida, non come vincolo. Il
+passo 4 (nomi in italiano) resta a Claude.
+
 Comandi in dev: `./script/start-dev.sh`; test con
 `docker compose -f docker-compose.dev.yaml exec app python -m pytest -v`.
 
@@ -198,20 +203,20 @@ Comandi in dev: `./script/start-dev.sh`; test con
 
 ### Passo 2 — Modello e migrazione
 
-- **Stato**: da fare
+- **Stato**: fatto (2026-11-22)
 - **Obiettivo**: le tabelle `exercises` e `exercise_catalog_state` esistono, create da Alembic.
 - **Lavoro**:
   - `exercises/models.py` (`Exercise`, `ExerciseCatalogState`); import in `alembic/env.py`.
   - revisione `0002_exercises` (autogenerate + revisione manuale).
   - `brain/architettura.md`: sezione "allenamento (ALL-001)" nel modello dati.
 - **Definition of done**:
-  - [ ] `alembic upgrade head` su DB vuoto crea le due tabelle con gli indici `ix_exercises_body_part` e
+  - [x] `alembic upgrade head` su DB vuoto crea le due tabelle con gli indici `ix_exercises_body_part` e
         `ix_exercises_equipment` (test).
-  - [ ] `alembic upgrade head` su un DB fermo alla revisione `0001` con un utente esistente mantiene l'utente
+  - [x] `alembic upgrade head` su un DB fermo alla revisione `0001` con un utente esistente mantiene l'utente
         e crea le tabelle (test).
-  - [ ] `alembic downgrade 0001` rimuove le due tabelle (test).
-  - [ ] `alembic check` non rileva differenze tra modelli e migrazioni.
-  - [ ] Test backend verdi.
+  - [x] `alembic downgrade 0001` rimuove le due tabelle (test).
+  - [x] `alembic check` non rileva differenze tra modelli e migrazioni.
+  - [x] Test backend verdi.
 
 ### Passo 3 — Caricamento automatico all'avvio
 
@@ -321,3 +326,24 @@ Scostamenti dal piano, problemi incontrati, esito delle verifiche di ogni passo.
   - `frontend/package.json`: `"@repdb/exercises": "2026.11.1"`;
   - `git ls-files | grep -E "exercises\.json|\.webp$"`: nessun risultato;
   - test backend: 61 superati; frontend: lint 0 errori (nel container), `npm run build` senza errori.
+
+### Passo 2 (fatto 2026-11-22, confermato dall'utente)
+
+- **Scostamento**: i test della migrazione stanno in un file nuovo non elencato nell'Impatto,
+  `backend/tests/test_exercises_migration.py` (i file `test_exercises_{sync,api}.py` arrivano con i passi 3 e 5).
+- `is_active` ha il valore predefinito solo lato Python (`default=True` nel modello), senza `server_default`
+  nel DB: le righe le scrive solo il caricamento, tramite l'ORM.
+- `exercise_catalog_state.id` è dichiarato con `autoincrement=False`: la riga è sempre quella con `id = 1`.
+- La revisione è stata generata con `alembic revision --autogenerate --rev-id 0002 -m "exercises"` su un DB
+  temporaneo fermo alla `0001`, poi riordinata a mano (stile della `0001`, commenti); nessuna operazione
+  aggiunta o tolta rispetto a quelle generate.
+- Il DB di sviluppo (`./data`) resta alla `0001` finché il container `app` non viene riavviato (le migrazioni
+  girano all'avvio).
+- Esito delle verifiche:
+  - `test_upgrade_head_creates_catalog_tables_and_indexes`: tabelle e indici `ix_exercises_body_part`,
+    `ix_exercises_equipment` creati su DB vuoto;
+  - `test_upgrade_from_0001_keeps_existing_user`: utente creato alla `0001` ancora presente dopo l'upgrade;
+  - `test_downgrade_to_0001_removes_catalog_tables`: le due tabelle spariscono, `users` e `sessions` restano;
+  - `alembic check` (DB temporaneo migrato a `head`): `No new upgrade operations detected.`; lo stesso
+    controllo è coperto dal test esistente `test_models_match_migrations`;
+  - test backend: 65 superati (61 + 4 nuovi).

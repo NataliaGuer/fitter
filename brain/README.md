@@ -38,6 +38,9 @@ Qui documentiamo **cosa** costruire e **perché** (feature) e **come** costruirl
 - **Stati dei passi**: `da fare` → `in corso` → `in verifica` → `fatto (AAAA-MM-GG)`.
   Un passo diventa `fatto` solo quando l'utente conferma che la DoD è soddisfatta.
 
+- **Backend (D-017)**: il backend lo scrive l'utente partendo dalla feature; l'issue backend è facoltativa. Il
+  contratto API concordato sta nella sezione "Contratto" dell'issue frontend.
+
 Ogni feature o issue aggiornata va riflessa anche in `backlog.md`.
 
 ## Flusso

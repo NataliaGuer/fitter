@@ -157,6 +157,20 @@ Formato: una sezione per decisione, la più recente in fondo.
   - **Rotte del frontend**: il mount statico restituisce `index.html` per le `GET` senza file corrispondente, tranne i percorsi `/api/` e quelli con estensione.
 - **Conseguenze**: aggiornare il catalogo = cambiare la versione in `frontend/package.json` e rilasciare; le tabelle future (routine, sessioni) possono avere una chiave esterna su `exercises.id`; attribuzione "Exercise data by RepDB" obbligatoria in `README.md` e nell'app.
 
+## D-017 — Il backend lo scrive l'utente (progetto usato per imparare Python)
+- **Data**: 2026-11-22
+- **Stato**: accettata
+- **Contesto**: l'utente vuole usare il progetto per imparare Python; sa già programmare in altri linguaggi.
+- **Decisione**:
+  - Il codice sotto `backend/` (applicazione, test, migrazioni) lo scrive l'utente; Claude non lo tocca senza richiesta esplicita e, su richiesta, spiega e fa review.
+  - Il frontend resta a Claude, con il flusso di D-011.
+  - Le feature si decidono insieme; per il backend l'issue e il piano tecnico diventano facoltativi e le decisioni tecniche sono dell'utente. Modifica D-011 per il solo backend.
+  - Il contratto API si concorda insieme e si scrive nell'issue frontend.
+  - Il codice backend già esistente (`core/`, `auth/`) resta; l'autenticazione potrà essere riscritta dall'utente più avanti come esercizio, usando i test esistenti come specifica.
+  - Il backend si sviluppa nel container `app` dell'ambiente dev (shell con `docker compose -f docker-compose.dev.yaml exec app bash`), non in un virtualenv locale: sul PC dell'utente il Controllo applicazioni di Windows blocca gli eseguibili non firmati.
+  - Anche le modifiche al `Dockerfile` che servono al backend le fa l'utente.
+- **Conseguenze**: le issue backend già approvate (ALL-001-BE-01) restano come guida per l'utente, che ne scrive i passi di codice dal passo 3 in poi (il passo 4, i nomi italiani degli esercizi, resta a Claude: è traduzione, non codice); la skill `/feature-to-issue` si usa per le issue frontend.
+
 ## Rimandate all'implementazione della sezione calorie (CAL-001)
 - **Quale API esterna** per gli alimenti (es. Open Food Facts: gratuita, senza chiave, supporta i barcode; alternative: USDA FoodData Central, Edamam).
 - **Visibilità degli alimenti inseriti dagli utenti**: privati per l'utente che li crea o condivisi con tutti?

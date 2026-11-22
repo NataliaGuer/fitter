@@ -10,6 +10,7 @@ from app.core.db import Base, make_engine
 
 # Import model modules here so autogenerate sees their tables.
 import app.auth.models  # noqa: F401, E402
+import app.exercises.models  # noqa: F401, E402
 
 config = context.config
 
